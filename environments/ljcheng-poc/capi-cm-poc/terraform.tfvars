@@ -1,6 +1,7 @@
 
 addition_tags = {}
 
+create       = true
 cluster_name = "capi-cm-poc"
 
 ### ArgoCD
