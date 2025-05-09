@@ -11,8 +11,7 @@ provider "aws" {
 module "capi_cluster_manager_bootstrap_app" {
   # source                                           = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
   source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
-  version = "1.0.0-alphq"
-
+  version = "1.0.0-alpha"
 
 
   create                                           = local.create
