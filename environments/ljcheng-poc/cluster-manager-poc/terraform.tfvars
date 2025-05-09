@@ -1,0 +1,32 @@
+
+addition_tags = {}
+
+cluster_name = "capi-cm-poc"
+
+### ArgoCD
+create_argocd = false
+create_argocd_cert = false
+create_wildcard_argocd_cert = false
+helm_release_argocd_helm_chart_version = "8.0.0"
+
+
+
+
+### AWS ELB
+create_aws_elb_controller = true
+helm_release_aws_elb_controller_parameter = {
+  helm_repo_namespace = "nginx"
+  helm_repo_url = "https://aws.github.io/eks-charts"
+  helm_repo_name = "aws-load-balancer-controller"
+  helm_repo_crd = "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"
+  helm_repo_timeout = 4000
+  helm_repo_version = "1.13.0"
+}
+
+
+create_external_secrets = false
+helm_release_external_secrets_helm_chart_version = "0.16.0"
+
+
+
+route53_zone_id = "Z02763451I8QENECRLHM9"
