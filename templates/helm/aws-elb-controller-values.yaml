@@ -83,15 +83,7 @@ tolerations:
     effect: "NoSchedule"
 
 # affinity specifies a custom affinity for the controller pods
-affinity:
-  nodeAffinity:
-    preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      preference:
-        matchExpressions:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-
+affinity: {}
 
 # configureDefaultAffinity specifies whether to configure a default affinity for the controller pods to prevent
 # co-location on the same node. This will get ignored if you specify a custom affinity configuration.
