@@ -119,7 +119,7 @@ additionalLabels: {}
 enableCertManager: false
 
 # The name of the Kubernetes cluster. A non-empty value is required
-clusterName: capi-cm-poc
+clusterName: ${cluster_name}
 
 # cluster contains configurations specific to the kubernetes cluster
 cluster:
