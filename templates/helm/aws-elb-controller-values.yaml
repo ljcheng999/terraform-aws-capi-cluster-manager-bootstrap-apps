@@ -8,7 +8,7 @@ revisionHistoryLimit: 10
 
 image:
   repository: public.ecr.aws/eks/aws-load-balancer-controller
-  tag: v2.12.0
+  tag: v2.13.0
   pullPolicy: IfNotPresent
 
 runtimeClassName: ""
@@ -58,6 +58,7 @@ securityContext:
 
 # Time period for the controller pod to do a graceful shutdown
 terminationGracePeriodSeconds: 10
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -74,13 +75,9 @@ resources: {}
 # ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
 priorityClassName: system-cluster-critical
 
-
 nodeSelector: {}
 
-tolerations:
-  - key: "node-role.kubernetes.io/control-plane"
-    value: "true"
-    effect: "NoSchedule"
+tolerations: []
 
 # affinity specifies a custom affinity for the controller pods
 affinity: {}
@@ -118,8 +115,13 @@ additionalLabels: {}
 # Enable cert-manager
 enableCertManager: false
 
+# Overrideable variables when enableCertManager is set to true
+certManager:
+  duration:
+  renewBefore:
+
 # The name of the Kubernetes cluster. A non-empty value is required
-clusterName: ${cluster_name}
+clusterName:
 
 # cluster contains configurations specific to the kubernetes cluster
 cluster:
@@ -337,8 +339,8 @@ defaultTags: {}
 
 # podDisruptionBudget specifies the disruption budget for the controller pods.
 # Disruption budget will be configured only when the replicaCount is greater than 1
-podDisruptionBudget:
-  maxUnavailable: 1
+podDisruptionBudget: {}
+#  maxUnavailable: 1
 
 # externalManagedTags is the list of tag keys on AWS resources that will be managed externally
 externalManagedTags: []
@@ -348,6 +350,9 @@ enableEndpointSlices:
 
 # enableBackendSecurityGroup enables shared security group for backend traffic (default true)
 enableBackendSecurityGroup:
+
+# enableManageBackendSecurityGroupRules enables controller manages security group rules (default false)
+enableManageBackendSecurityGroupRules:
 
 # backendSecurityGroup specifies backend security group id (default controller auto create backend security group)
 backendSecurityGroup:
