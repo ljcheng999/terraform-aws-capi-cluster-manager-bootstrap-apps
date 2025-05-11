@@ -72,7 +72,7 @@ resource "kubernetes_service_account" "external_secrets_operator" {
 resource "kubernetes_manifest" "aws_clustersecretstore" {
   
   manifest = {
-    apiVersion = "external-secrets.io/v1alpha1"
+    apiVersion = "external-secrets.io/v1beta1"
     kind       = "ClusterSecretStore"
     metadata = {
       name      = "${var.cluster_name}-cluster-secret-store"
