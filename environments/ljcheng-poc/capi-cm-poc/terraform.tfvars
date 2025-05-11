@@ -22,16 +22,60 @@ helm_release_aws_elb_controller_parameter = {
   helm_repo_version = "1.13.0"
   helm_repo_crd = null
 }
-
 helm_release_aws_elb_controller_set_parameter = [
   {
     name = "clusterName"
     value = "capi-cm-poc"
   },
+  {
+    name  = "tolerations[0].key"
+    value = "node-role.kubernetes.io/control-plan"
+  },
+  {
+    name  = "tolerations[0].value"
+    value = "true"
+  },
+  {
+    name  = "tolerations[0].operator"
+    value = "Equal"
+  },
+  {
+    name  = "tolerations[0].effect"
+    value = "NoSchedule"
+  },
 ]
 
-create_external_secrets = false
-helm_release_external_secrets_helm_chart_version = "0.16.0"
+# node-role.kubernetes.io/control-plane=true:NoSchedule
+
+create_external_secrets = true
+create_external_secrets_namespace = true
+helm_release_external_secrets_parameter = {
+  create_namespace = true
+  helm_repo_namespace = "external-secrets"
+  helm_repo_url = "https://charts.external-secrets.io"
+  helm_repo_name = "external-secrets"
+  helm_repo_version = "0.16.2"
+  helm_repo_crd = null
+}
+helm_release_external_secrets_set_parameter = [
+  {
+    name  = "tolerations[0].key"
+    value = "node-role.kubernetes.io/control-plan"
+  },
+  {
+    name  = "tolerations[0].value"
+    value = "true"
+  },
+  {
+    name  = "tolerations[0].operator"
+    value = "Equal"
+  },
+  {
+    name  = "tolerations[0].effect"
+    value = "NoSchedule"
+  },
+]
+
 
 
 

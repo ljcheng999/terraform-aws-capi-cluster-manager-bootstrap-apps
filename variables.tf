@@ -73,21 +73,11 @@ variable "cluster_name" {
   default     = "cluster-manager"
 }
 
-################################################################################
-# Helm Charts Creation
-################################################################################
-### ArgoCD
-################################################################################
 
-variable "create_aws_elb_controller" {
-  type        = bool
-  default     = false
-}
 
-variable "create_external_secrets" {
-  type        = bool
-  default     = false
-}
+
+
+
 
 variable "create_argocd" {
   type        = bool
@@ -123,18 +113,7 @@ variable "create_argocd" {
 #   }
 # }
 
-variable "helm_release_aws_elb_controller_parameter" {
-  type        = map
-  default     = {}
-}
 
-variable "helm_release_aws_elb_controller_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
 
 
 
@@ -181,12 +160,51 @@ variable "custom_argocd_subdomain" {
 }
 
 ################################################################################
+### AWS ELB Controller
+################################################################################
+
+variable "create_aws_elb_controller" {
+  type        = bool
+  default     = false
+}
+
+variable "helm_release_aws_elb_controller_parameter" {
+  type        = map
+  default     = {}
+}
+
+variable "helm_release_aws_elb_controller_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+################################################################################
 ### External Secrets
 ################################################################################
 
-variable "helm_release_external_secrets_helm_chart_version" {
-  type        = string
-  default     = "0.16.0"
+variable "create_external_secrets" {
+  type        = bool
+  default     = false
+}
+variable "create_external_secrets_namespace" {
+  type        = bool
+  default     = false
+}
+
+variable "helm_release_external_secrets_parameter" {
+  type        = map
+  default     = {}
+}
+
+variable "helm_release_external_secrets_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
 }
 
 ################################################################################

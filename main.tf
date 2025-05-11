@@ -10,7 +10,7 @@ provider "aws" {
 
 module "capi_cluster_manager_bootstrap_app" {
   source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
-  version = "1.0.0-beta1"
+  version = "1.0.0-beta2"
 
   create                                           = local.create
   cluster_name                                     = local.cluster_name
@@ -35,7 +35,8 @@ module "capi_cluster_manager_bootstrap_app" {
 
   ### External Secrets
   create_external_secrets                          = local.create_external_secrets
-  helm_release_external_secrets_helm_chart_version = local.helm_release_external_secrets_helm_chart_version
+  helm_release_external_secrets_parameter          = local.helm_release_external_secrets_parameter
+  helm_release_external_secrets_set_parameter      = local.helm_release_external_secrets_set_parameter
 
 
 

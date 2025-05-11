@@ -20,6 +20,10 @@ locals {
   helm_release_aws_elb_controller_parameter        = var.helm_release_aws_elb_controller_parameter
   helm_release_aws_elb_controller_set_parameter    = var.helm_release_aws_elb_controller_set_parameter
 
+  ### External Secrets
+  create_external_secrets                          = var.create_external_secrets
+  helm_release_external_secrets_parameter          = var.helm_release_external_secrets_parameter
+  helm_release_external_secrets_set_parameter      = var.helm_release_external_secrets_set_parameter
 
 
 
@@ -37,7 +41,5 @@ locals {
 
   public_subnet_ids                                = var.public_subnet_ids
 
-  ### External Secrets
-  create_external_secrets                          = var.create_external_secrets
-  helm_release_external_secrets_helm_chart_version = var.helm_release_external_secrets_helm_chart_version
+  
 }
