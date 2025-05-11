@@ -52,14 +52,6 @@ variable "helm_release_argocd_helm_chart_version" {
   default     = "8.0.0"
 }
 
-variable "helm_release_external_secrets_helm_chart_version" {
-  type        = string
-  default     = "0.16.0"
-}
-# variable "helm_release_aws_elb_controller_helm_chart_version" {
-#   type        = string
-#   default     = "1.12.0"
-# }
 
 variable "helm_release_velero_helm_revision" {
   type        = string
@@ -201,6 +193,43 @@ variable "helm_release_aws_elb_controller_parameter" {
 }
 
 variable "helm_release_aws_elb_controller_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+################################################################################
+### Velero Controller
+################################################################################
+
+variable "create_velero_controller" {
+  type        = bool
+  default     = false
+}
+variable "create_velero_namespace" {
+  type        = bool
+  default     = true
+}
+variable "helm_release_velero_parameter" {
+  type        = map
+  default     = {
+    helm_repo_namespace = ""
+    helm_repo_url = ""
+    helm_repo_name = ""
+    helm_repo_crd = null
+    helm_repo_timeout = 4000
+    helm_repo_version = ""
+    cloud_provider = ""
+    cloud_bucket  = ""
+    cloud_bucket_folder_name = ""
+    cloud_region  = ""
+    cloud_bucket_prefix = ""
+  }
+}
+
+variable "helm_release_velero_set_parameter" {
   type = list(object({
     name  = string
     value = string

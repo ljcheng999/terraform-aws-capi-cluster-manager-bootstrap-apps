@@ -11,6 +11,10 @@ data "aws_eks_cluster_auth" "this" {
   ]
 }
 
+data "aws_iam_openid_connect_provider" "this" {
+  count = local.create ? 1 : 0
+  url = data.aws_eks_cluster.this[0].identity[0].oidc[0].issuer
+}
 
 
 
