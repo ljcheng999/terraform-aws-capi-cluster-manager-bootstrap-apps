@@ -33,6 +33,31 @@ variable "default_helm_repo_parameter" {
   }
 }
 
+variable "default_system_node_groups_toleration" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = [
+    {
+      name  = "tolerations[0].key"
+      value = "capi-cm-poc.kubesources.com/node-role"
+    },
+    {
+      name  = "tolerations[0].value"
+      value = "system"
+    },
+    {
+      name  = "tolerations[0].operator"
+      value = "Equal"
+    },
+    {
+      name  = "tolerations[0].effect"
+      value = "NoSchedule"
+    },
+  ]
+}
+
 ################################################################################
 # Cluster
 ################################################################################
