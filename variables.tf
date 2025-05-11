@@ -100,10 +100,45 @@ variable "create_argocd" {
 ### ArgoCD
 ################################################################################
 
+# variable "helm_release_aws_elb_controller" {
+#   type = map(object({
+#     helm_repo_namespace = string
+#     helm_repo_url       = string
+#     helm_repo_name      = string
+#     helm_repo_version   = string
+#     helm_repo_crd       = any
+#   }))
+#   default = {
+#     helm_repo_namespace = "nginx"
+#     helm_repo_url       = "https://aws.github.io/eks-charts"
+#     helm_repo_name      = "aws-load-balancer-controller"
+#     helm_repo_version   = "1.13.0"
+#     helm_repo_crd       = null
+#     helm_set_parameters = [
+#       {
+#         name  = ""
+#         value = ""
+#       }
+#     ]
+#   }
+# }
+
 variable "helm_release_aws_elb_controller_parameter" {
   type        = map
   default     = {}
 }
+variable "helm_release_aws_elb_controller_sets_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+
+
+
+
 
 
 variable "helm_release_argocd_helm_chart_version" {

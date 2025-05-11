@@ -9,6 +9,7 @@ provider "aws" {
 
 
 module "capi_cluster_manager_bootstrap_app" {
+  # source                                           = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
   source                                           = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
   version                                          = "1.0.0-beta"
 
@@ -20,6 +21,7 @@ module "capi_cluster_manager_bootstrap_app" {
   ### AWS ELB
   create_aws_elb_controller                        = local.create_aws_elb_controller
   helm_release_aws_elb_controller_parameter        = local.helm_release_aws_elb_controller_parameter
+  helm_release_aws_elb_controller_sets_parameter   = local.helm_release_aws_elb_controller_sets_parameter
 
 
   ### ArgoCD

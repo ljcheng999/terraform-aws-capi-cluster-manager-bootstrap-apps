@@ -19,11 +19,19 @@ helm_release_aws_elb_controller_parameter = {
   helm_repo_namespace = "nginx"
   helm_repo_url = "https://aws.github.io/eks-charts"
   helm_repo_name = "aws-load-balancer-controller"
-  helm_repo_crd = "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"
-  helm_repo_timeout = 4000
   helm_repo_version = "1.13.0"
+  helm_repo_crd = null
 }
-
+helm_release_aws_elb_controller_sets_parameter = [
+  {
+    name = "clusterName"
+    value = "capi-cm-poc"
+  },
+  {
+    name = "serviceAccount.name"
+    value = "capi-cm-poc"
+  },
+]
 
 create_external_secrets = false
 helm_release_external_secrets_helm_chart_version = "0.16.0"
