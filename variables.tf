@@ -20,20 +20,10 @@ variable "route53_zone_id" {
   default     = "Z02763451I8QENECRLHM9"
 }
 
-# chart            = "aws-load-balancer-controller"
-#   create_namespace = true
-#   name             = "aws-load-balancer-controller"
-#   namespace        = "aws-load-balancer"
-#   repository       = local.helm_release_alb_helm_chart_repo
-#   timeout          = 4800
-#   version          = local.helm_release_alb_helm_chart_version
-#   wait             = true
-#   wait_for_jobs    = true
-
-
 variable "default_helm_repo_parameter" {
   type        = map
   default     = {
+    create_namespace    = "create_namespace"
     helm_repo_name      = "helm_repo_name_key"
     helm_repo_timeout   = "helm_repo_timeout"
     helm_repo_namespace = "helm_repo_namespace"
@@ -162,33 +152,23 @@ variable "helm_release_argocd_timeout" {
 ################################################################################
 ### External Secrets
 ################################################################################
-variable "create_external_secrets_namespace" {
-  type        = bool
-  default     = true
-}
+
 variable "create_external_secrets" {
   type        = bool
   default     = false
 }
-variable "helm_release_external_secrets_timeout" {
-  type        = number
-  default     = 4800
+
+variable "helm_release_external_secrets_parameter" {
+  type        = map
+  default     = {}
 }
-variable "helm_release_external_secrets_name" {
-  type        = string
-  default     = "external-secrets"
-}
-variable "helm_release_external_secrets_helm_chart_name" {
-  type        = string
-  default     = "external-secrets"
-}
-variable "helm_release_external_secrets_helm_chart_namespace" {
-  type        = string
-  default     = "external-secrets"
-}
-variable "helm_release_external_secrets_helm_repo_location" {
-  type        = string
-  default     = "https://charts.external-secrets.io"
+
+variable "helm_release_external_secrets_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
 }
 
 ################################################################################

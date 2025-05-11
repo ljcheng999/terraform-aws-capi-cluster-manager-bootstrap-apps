@@ -9,10 +9,13 @@ locals {
   create_aws_elb_controller_namespace                 = var.create_aws_elb_controller_namespace
   helm_release_aws_elb_controller_parameter           = var.helm_release_aws_elb_controller_parameter
   
-  
+  ### External Secrets
+  create_external_secrets                             = var.create_external_secrets
+  helm_release_external_secrets_parameter             = var.helm_release_external_secrets_parameter
+  helm_release_external_secrets_set_parameter         = var.helm_release_external_secrets_set_parameter
 
 
-
+  #######################################################################################
 
   custom_domain                                       = var.custom_domain
   custom_argocd_subdomain                             = var.custom_argocd_subdomain
@@ -41,18 +44,7 @@ locals {
   create_wildcard_argocd_cert                         = var.create_wildcard_argocd_cert
   public_subnet_ids                                   = var.public_subnet_ids
 
-  ### External Secrets
-  create_external_secrets                             = var.create_external_secrets
-  create_external_secrets_namespace                   = var.create_external_secrets_namespace
-  helm_release_external_secrets_timeout               = var.helm_release_external_secrets_timeout
-  helm_release_external_secrets_name                  = var.helm_release_external_secrets_name
-  helm_release_external_secrets_helm_chart_name       = var.helm_release_external_secrets_helm_chart_name
-  helm_release_external_secrets_helm_chart_namespace  = var.helm_release_external_secrets_helm_chart_namespace
-  helm_release_external_secrets_helm_repo_location    = var.helm_release_external_secrets_helm_repo_location
-  helm_release_external_secrets_helm_chart_version    = var.helm_release_external_secrets_helm_chart_version
 
-
-  
   
 
   # helm_release_velero_helm_repo                    = "https://vmware-tanzu.github.io/helm-charts"
