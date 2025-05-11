@@ -21,6 +21,11 @@ module "capi_cluster_manager_bootstrap_app" {
   helm_release_aws_elb_controller_parameter        = local.helm_release_aws_elb_controller_parameter
   helm_release_aws_elb_controller_set_parameter    = local.helm_release_aws_elb_controller_set_parameter
 
+  ### External Secrets
+  create_external_secrets                          = local.create_external_secrets
+  helm_release_external_secrets_parameter          = local.helm_release_external_secrets_parameter
+  helm_release_external_secrets_set_parameter      = local.helm_release_external_secrets_set_parameter
+
 
 
   ### ArgoCD
@@ -34,12 +39,7 @@ module "capi_cluster_manager_bootstrap_app" {
   helm_release_argocd_helm_chart_version           = local.helm_release_argocd_helm_chart_version
 
 
-  ### External Secrets
-  create_external_secrets                          = local.create_external_secrets
-  helm_release_external_secrets_parameter          = local.helm_release_external_secrets_parameter
-  helm_release_external_secrets_set_parameter      = local.helm_release_external_secrets_set_parameter
-
-
+  
 
   # tags = local.tags
   tags = merge(
