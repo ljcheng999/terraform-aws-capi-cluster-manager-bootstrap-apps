@@ -8,7 +8,7 @@ locals {
   create_aws_elb_controller                           = var.create_aws_elb_controller
   create_aws_elb_controller_namespace                 = var.create_aws_elb_controller_namespace
   helm_release_aws_elb_controller_parameter           = var.helm_release_aws_elb_controller_parameter
-  helm_release_aws_elb_controller_set_parameter       = var.helm_release_aws_elb_controller_set_parameter
+  # helm_release_aws_elb_controller_set_parameter       = var.helm_release_aws_elb_controller_set_parameter
   
   
 
