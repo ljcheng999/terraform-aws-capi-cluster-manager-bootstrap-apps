@@ -167,6 +167,10 @@ variable "helm_release_external_secrets_set_parameter" {
   }))
   default = []
 }
+variable "helm_release_external_secrets_serviceaccount_name" {
+  type = string
+  default = "es-irsa"
+}
 
 ################################################################################
 ### AWS ELB Controller

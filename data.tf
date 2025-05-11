@@ -17,6 +17,25 @@ data "aws_iam_openid_connect_provider" "this" {
 }
 
 
+data "aws_iam_policy_document" "eso_assume_role" {
+  count = local.create && local.create_external_secrets ? 1 : 0
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    principals {
+      type        = "Federated"
+      identifiers = [
+        data.aws_iam_openid_connect_provider.this[0].arn
+      ]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.this[0].url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:${lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")}:${var.helm_release_external_secrets_serviceaccount_name}"]
+    }
+  }
+}
+
 
 
 
