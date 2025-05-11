@@ -41,8 +41,8 @@ data "aws_iam_policy_document" "eso_assume_role" {
       test     = "StringEquals"
       # variable = "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub"
       variable = "${replace(data.aws_iam_openid_connect_provider.this[0].url, "https://", "")}:sub"
-      # values   = ["system:serviceaccount:${kubernetes_namespace.eso.metadata[0].name}:external-secrets"]
-      values   = ["system:serviceaccount:*:external-secrets"]
+      # values   = ["system:serviceaccount:external-secrets:${kubernetes_service_account.es_operator_sa.metadata[0].name}"]
+      values   = ["system:serviceaccount:${lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")}:${kubernetes_service_account.es_operator_sa.metadata[0].name}"]
     }
   }
 }
@@ -53,14 +53,14 @@ resource "aws_iam_role_policy_attachment" "eso_policy_attachment" {
 }
 
 resource "aws_iam_role" "eso" {
-  name               = "eks-external-secrets-operator"
+  name               = "${var.cluster_name}-eks-external-secrets-operator"
   assume_role_policy = data.aws_iam_policy_document.eso_assume_role.json
 }
 
-resource "kubernetes_service_account" "external_secrets_operator" {
+resource "kubernetes_service_account" "es_operator_sa" {
   metadata {
-    name      = "external-secrets-operator"
-    namespace = "external-secrets"
+    name      = "external-secrets-sa"
+    namespace = "${lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")}"
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
     }
@@ -68,9 +68,7 @@ resource "kubernetes_service_account" "external_secrets_operator" {
 }
 
 
-
 resource "kubernetes_manifest" "aws_clustersecretstore" {
-  
   manifest = {
     apiVersion = "external-secrets.io/v1beta1"
     kind       = "ClusterSecretStore"
@@ -80,8 +78,15 @@ resource "kubernetes_manifest" "aws_clustersecretstore" {
     spec = {
       provider = {
         aws = {
+          auth = {
+            jwt = {
+              serviceAccountRef = {
+                name = "${kubernetes_service_account.es_operator_sa.metadata[0].name}"
+                namespace = "external-secrets"
+              }
+            }
+          }
           service = lookup(local.helm_release_external_secrets_parameter, "service", "SecretsManager")
-          role    = aws_iam_role.eso.arn
           region  = lookup(local.helm_release_external_secrets_parameter, "region", "us-east-1")
         }
       }
