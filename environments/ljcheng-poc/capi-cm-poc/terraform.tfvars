@@ -33,7 +33,7 @@ helm_release_aws_elb_controller_set_parameter = [
   },
   {
     name  = "tolerations[0].value"
-    value = "true"
+    value = true
   },
   {
     name  = "tolerations[0].operator"
@@ -47,7 +47,7 @@ helm_release_aws_elb_controller_set_parameter = [
 
 # node-role.kubernetes.io/control-plane=true:NoSchedule
 
-create_external_secrets = true
+create_external_secrets = false
 helm_release_external_secrets_parameter = {
   helm_repo_namespace = "external-secrets"
   helm_repo_url = "https://charts.external-secrets.io"
