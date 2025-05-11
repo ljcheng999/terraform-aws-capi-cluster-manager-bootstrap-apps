@@ -214,3 +214,11 @@ variable "helm_release_aws_elb_controller_parameter" {
     helm_repo_version = "1.13.0"
   }
 }
+
+variable "helm_release_aws_elb_controller_sets_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}

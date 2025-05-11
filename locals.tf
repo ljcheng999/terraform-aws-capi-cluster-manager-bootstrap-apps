@@ -8,9 +8,12 @@ locals {
   create_aws_elb_controller                           = var.create_aws_elb_controller
   create_aws_elb_controller_namespace                 = var.create_aws_elb_controller_namespace
   helm_release_aws_elb_controller_parameter           = var.helm_release_aws_elb_controller_parameter
+  helm_release_aws_elb_controller_sets_parameter      = var.helm_release_aws_elb_controller_sets_parameter
+  
+  
 
-  
-  
+
+
 
   custom_domain                                       = var.custom_domain
   custom_argocd_subdomain                             = var.custom_argocd_subdomain
