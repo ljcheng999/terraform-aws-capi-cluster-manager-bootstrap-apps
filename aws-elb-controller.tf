@@ -30,21 +30,3 @@ resource "helm_release" "aws_elb_controller" {
   #   })
   # ]
 }
-
-
-# data "http" "aws_elb_controller_stable_crd" {
-
-#   url = local.aws_elb_controller_stable_crd_url
-#   request_headers = {
-#     Accept = "text/plain"
-#   }
-# }
-
-# locals {
-#   yamls = [for data in split("---", data.http.aws_elb_controller_stable_crd.body): yamldecode(data)]
-# }
-
-# resource "kubernetes_manifest" "install-crd" {
-#   count = length(local.yamls)
-#   manifest = local.yamls[count.index]
-# }
