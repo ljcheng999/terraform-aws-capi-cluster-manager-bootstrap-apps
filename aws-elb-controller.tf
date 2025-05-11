@@ -24,13 +24,15 @@ resource "helm_release" "aws_elb_controller" {
     }
   }
 
-  dynamic "tolerations" {
-    for_each = var.default_system_node_groups_toleration
-    content {
-      name = set.value.name
-      value = set.value.value
-    }
-  }
+  # dynamic "toleration" {
+  #   for_each = var.default_system_node_groups_toleration
+  #   content {
+  #     key      = toleration.value["key"]
+  #     operator = toleration.value["operator"]
+  #     value    = toleration.value["value"]
+  #     effect   = toleration.value["effect"]
+  #   }
+  # }
 
     # values = [
   #   templatefile("${path.module}/templates/helm/aws-elb-controller-values.yaml", {
