@@ -27,7 +27,10 @@ locals {
   helm_release_external_secrets_set_parameter      = var.helm_release_external_secrets_set_parameter
 
 
-
+  ### Velero
+  create_velero_controller                         = var.create_velero_controller
+  helm_release_velero_parameter                    = var.helm_release_velero_parameter
+  helm_release_velero_set_parameter                = var.helm_release_velero_set_parameter
 
 
 

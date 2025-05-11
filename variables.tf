@@ -214,10 +214,6 @@ variable "create_external_secrets" {
   type        = bool
   default     = false
 }
-variable "create_external_secrets_namespace" {
-  type        = bool
-  default     = false
-}
 
 variable "helm_release_external_secrets_parameter" {
   type        = map
@@ -225,10 +221,10 @@ variable "helm_release_external_secrets_parameter" {
 }
 
 variable "helm_release_external_secrets_set_parameter" {
-  # type = list(object({
-  #   name  = string
-  #   value = string
-  # }))
+  type = list(object({
+    name  = string
+    value = string
+  }))
   default = []
 }
 
@@ -236,7 +232,20 @@ variable "helm_release_external_secrets_set_parameter" {
 ### Velero
 ################################################################################
 
-variable "helm_release_velero_helm_revision" {
-  type        = string
-  default     = "8.3.0"
+variable "create_velero_controller" {
+  type        = bool
+  default     = false
+}
+
+variable "helm_release_velero_parameter" {
+  type        = map
+  default     = {}
+}
+
+variable "helm_release_velero_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
 }

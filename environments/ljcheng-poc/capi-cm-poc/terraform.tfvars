@@ -75,6 +75,38 @@ helm_release_external_secrets_set_parameter = [
 ]
 
 
+create_velero_controller = false
+helm_release_velero_parameter = {
+  helm_repo_namespace = "velero"
+  helm_repo_url = "https://vmware-tanzu.github.io/helm-charts/"
+  helm_repo_name = "vmware-tanzu"
+  helm_repo_crd = null
+  helm_repo_timeout = 4000
+  helm_repo_version = "9.1.2"
+  cloud_provider = "aws"
+  cloud_bucket  = "ljc-cluster-backups"
+  cloud_bucket_folder_name = "core-kubesources-cluster-backups"
+  cloud_region  = "us-east-1"
+  cloud_bucket_prefix = "capi-cm-poc"
+}
+helm_release_velero_set_parameter = [
+  {
+    name  = "tolerations[0].key"
+    value = "node.kubesources.com/role"
+  },
+  {
+    name  = "tolerations[0].value"
+    value = "system"
+  },
+  {
+    name  = "tolerations[0].operator"
+    value = "Equal"
+  },
+  {
+    name  = "tolerations[0].effect"
+    value = "NoSchedule"
+  },
+]
 
 
 route53_zone_id = "Z02763451I8QENECRLHM9"
