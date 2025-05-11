@@ -10,7 +10,7 @@ provider "aws" {
 
 module "capi_cluster_manager_bootstrap_app" {
   source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
-  version = "1.0.0-beta2"
+  version = "1.0.0-beta4"
 
   create                                           = local.create
   cluster_name                                     = local.cluster_name
@@ -20,6 +20,7 @@ module "capi_cluster_manager_bootstrap_app" {
   create_aws_elb_controller                        = local.create_aws_elb_controller
   helm_release_aws_elb_controller_parameter        = local.helm_release_aws_elb_controller_parameter
   helm_release_aws_elb_controller_set_parameter    = local.helm_release_aws_elb_controller_set_parameter
+
 
 
   ### ArgoCD

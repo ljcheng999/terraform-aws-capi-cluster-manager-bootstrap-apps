@@ -63,6 +63,31 @@ variable "create" {
   default     = true
 }
 
+variable "default_helm_release_set_parameter" {
+  # type = list(object({
+  #   name  = string
+  #   value = string
+  # }))
+  default = [
+    {
+      name  = "tolerations[0].key"
+      value = "node-role.kubernetes.io/control-plan"
+    },
+    {
+      name  = "tolerations[0].value"
+      value = "true"
+    },
+    {
+      name  = "tolerations[0].operator"
+      value = "Equal"
+    },
+    {
+      name  = "tolerations[0].effect"
+      value = "NoSchedule"
+    },
+  ]
+}
+
 ################################################################################
 # Cluster
 ################################################################################
@@ -200,10 +225,10 @@ variable "helm_release_external_secrets_parameter" {
 }
 
 variable "helm_release_external_secrets_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
+  # type = list(object({
+  #   name  = string
+  #   value = string
+  # }))
   default = []
 }
 
