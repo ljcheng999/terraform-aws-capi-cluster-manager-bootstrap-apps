@@ -29,11 +29,11 @@ helm_release_aws_elb_controller_set_parameter = [
   },
   {
     name  = "tolerations[0].key"
-    value = "node-role.kubernetes.io/control-plan"
+    value = "capi-cm-poc.kubesources.com/node-role"
   },
   {
     name  = "tolerations[0].value"
-    value = true
+    value = "system"
   },
   {
     name  = "tolerations[0].operator"
@@ -43,6 +43,22 @@ helm_release_aws_elb_controller_set_parameter = [
     name  = "tolerations[0].effect"
     value = "NoSchedule"
   },
+  # {
+  #   name  = "tolerations[0].key"
+  #   value = "node-role.kubernetes.io/control-plan"
+  # },
+  # {
+  #   name  = "tolerations[0].value"
+  #   value = true
+  # },
+  # {
+  #   name  = "tolerations[0].operator"
+  #   value = "Equal"
+  # },
+  # {
+  #   name  = "tolerations[0].effect"
+  #   value = "NoSchedule"
+  # },
 ]
 
 # node-role.kubernetes.io/control-plane=true:NoSchedule
