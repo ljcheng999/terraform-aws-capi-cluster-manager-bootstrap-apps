@@ -58,11 +58,11 @@ helm_release_external_secrets_parameter = {
 helm_release_external_secrets_set_parameter = [
   {
     name  = "tolerations[0].key"
-    value = "node-role.kubernetes.io/control-plan"
+    value = "node.kubesources.com/role"
   },
   {
     name  = "tolerations[0].value"
-    value = "true"
+    value = "system"
   },
   {
     name  = "tolerations[0].operator"
