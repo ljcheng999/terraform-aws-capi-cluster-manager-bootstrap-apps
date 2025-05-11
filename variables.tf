@@ -157,6 +157,10 @@ variable "create_external_secrets" {
   type        = bool
   default     = false
 }
+variable "create_external_secrets_namespace" {
+  type        = bool
+  default     = true
+}
 
 variable "helm_release_external_secrets_parameter" {
   type        = map

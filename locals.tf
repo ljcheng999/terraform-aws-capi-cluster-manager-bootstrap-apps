@@ -11,6 +11,7 @@ locals {
   
   ### External Secrets
   create_external_secrets                             = var.create_external_secrets
+  create_external_secrets_namespace                   = var.create_external_secrets_namespace
   helm_release_external_secrets_parameter             = var.helm_release_external_secrets_parameter
   helm_release_external_secrets_set_parameter         = var.helm_release_external_secrets_set_parameter
 
