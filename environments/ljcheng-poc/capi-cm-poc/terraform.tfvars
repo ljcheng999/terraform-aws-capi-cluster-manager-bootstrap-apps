@@ -48,9 +48,7 @@ helm_release_aws_elb_controller_set_parameter = [
 # node-role.kubernetes.io/control-plane=true:NoSchedule
 
 create_external_secrets = true
-create_external_secrets_namespace = true
 helm_release_external_secrets_parameter = {
-  create_namespace = true
   helm_repo_namespace = "external-secrets"
   helm_repo_url = "https://charts.external-secrets.io"
   helm_repo_name = "external-secrets"
