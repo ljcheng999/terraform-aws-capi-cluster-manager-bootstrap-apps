@@ -22,13 +22,10 @@ helm_release_aws_elb_controller_parameter = {
   helm_repo_version = "1.13.0"
   helm_repo_crd = null
 }
-helm_release_aws_elb_controller_sets_parameter = [
+
+helm_release_aws_elb_controller_set_parameter = [
   {
     name = "clusterName"
-    value = "capi-cm-poc"
-  },
-  {
-    name = "serviceAccount.name"
     value = "capi-cm-poc"
   },
 ]

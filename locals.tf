@@ -18,7 +18,8 @@ locals {
   ### AWS ELB
   create_aws_elb_controller                        = var.create_aws_elb_controller
   helm_release_aws_elb_controller_parameter        = var.helm_release_aws_elb_controller_parameter
-  helm_release_aws_elb_controller_sets_parameter   = var.helm_release_aws_elb_controller_sets_parameter
+  helm_release_aws_elb_controller_set_parameter    = var.helm_release_aws_elb_controller_set_parameter
+
 
 
 

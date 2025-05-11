@@ -127,7 +127,8 @@ variable "helm_release_aws_elb_controller_parameter" {
   type        = map
   default     = {}
 }
-variable "helm_release_aws_elb_controller_sets_parameter" {
+
+variable "helm_release_aws_elb_controller_set_parameter" {
   type = list(object({
     name  = string
     value = string
