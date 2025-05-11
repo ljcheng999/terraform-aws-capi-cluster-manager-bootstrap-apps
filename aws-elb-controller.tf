@@ -17,7 +17,7 @@ resource "helm_release" "aws_elb_controller" {
   max_history      = 3
 
   dynamic "set" {
-    for_each = local.helm_release_aws_elb_controller_sets_parameter != null ? local.helm_release_aws_elb_controller_sets_parameter : []
+    for_each = local.helm_release_aws_elb_controller_set_parameter != null ? var.helm_release_aws_elb_controller_set_parameter : []
 
     content {
       name  = set.value["name"]
