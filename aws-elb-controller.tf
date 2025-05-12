@@ -16,17 +16,5 @@ resource "helm_release" "aws_elb_controller" {
   wait_for_jobs    = true
   max_history      = 3
 
-  dynamic "set" {
-    for_each = length(var.helm_release_aws_elb_controller_set_parameter) > 0 ? var.helm_release_aws_elb_controller_set_parameter : []
-    content {
-      name = set.value.name
-      value = set.value.value
-    }
-  }
-
-    # values = [
-  #   templatefile("${path.module}/templates/helm/aws-elb-controller-values.yaml", {
-  #     cluster_name="${local.cluster_name}"
-  #   })
-  # ]
+  values = [templatefile("${path.module}/templates/helm/aws-elb-controller-values.yaml", {})]
 }

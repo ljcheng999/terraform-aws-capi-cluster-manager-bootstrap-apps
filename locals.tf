@@ -13,19 +13,16 @@ locals {
   create_external_secrets                             = var.create_external_secrets
   create_external_secrets_namespace                   = var.create_external_secrets_namespace
   helm_release_external_secrets_parameter             = var.helm_release_external_secrets_parameter
-  # helm_release_external_secrets_set_parameter         = var.helm_release_external_secrets_set_parameter
 
   ### Velero
   create_velero_controller                            = var.create_velero_controller
   create_velero_namespace                             = var.create_velero_namespace
   helm_release_velero_parameter                       = var.helm_release_velero_parameter
-  helm_release_velero_set_parameter                   = var.helm_release_velero_set_parameter
 
   ### Metrics Server
   create_metrics_server_controller                    = var.create_metrics_server_controller
   create_metrics_server_controller_namespace          = var.create_metrics_server_controller_namespace
-  helm_release_metrics_server_controller_parameter     = var.helm_release_metrics_server_controller_parameter
-  helm_release_metrics_server_controller_set_parameter = var.helm_release_metrics_server_controller_set_parameter
+  helm_release_metrics_server_controller_parameter    = var.helm_release_metrics_server_controller_parameter
 
 
   #######################################################################################
@@ -40,7 +37,7 @@ locals {
   create_argocd                                       = var.create_argocd
   create_argocd_namespace                             = var.create_argocd_namespace
   helm_release_argocd_parameter                       = var.helm_release_argocd_parameter
-  helm_release_argocd_set_parameter                   = var.helm_release_argocd_set_parameter
+
 
 
 

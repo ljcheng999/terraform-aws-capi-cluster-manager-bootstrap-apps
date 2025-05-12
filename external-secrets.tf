@@ -13,14 +13,6 @@ resource "helm_release" "external_secrets" {
   wait             = true
   wait_for_jobs    = true
   max_history      = 3
-  
-  # dynamic "set" {
-  #  for_each = length(local.helm_release_external_secrets_set_parameter) > 0 ? local.helm_release_external_secrets_set_parameter : []
-  #   content {
-  #     name = set.value.name
-  #     value = set.value.value
-  #   }
-  # }
 
   values = [templatefile("${path.module}/templates/helm/external-secrets-values.yaml", {})]
 }

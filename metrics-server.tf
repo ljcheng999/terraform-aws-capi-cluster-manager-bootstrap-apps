@@ -13,14 +13,6 @@ resource "helm_release" "metrics_server" {
   wait             = true
   wait_for_jobs    = true
   max_history      = 3
-  
-  dynamic "set" {
-   for_each = length(local.helm_release_velero_set_parameter) > 0 ? local.helm_release_velero_set_parameter : []
-    content {
-      name = set.value.name
-      value = set.value.value
-    }
-  }
 
   values = [templatefile("${path.module}/templates/helm/metrics-server.yaml", {})]
 }

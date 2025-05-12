@@ -65,13 +65,6 @@ variable "helm_release_argocd_parameter" {
   default     = {}
 }
 
-variable "helm_release_argocd_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
 variable "helm_release_argocd_serviceaccount_name" {
   type = string
   default = "argocd-irsa"
@@ -158,13 +151,6 @@ variable "helm_release_external_secrets_parameter" {
   default     = {}
 }
 
-# variable "helm_release_external_secrets_set_parameter" {
-#   type = list(object({
-#     name  = string
-#     value = string
-#   }))
-#   default = []
-# }
 variable "helm_release_external_secrets_serviceaccount_name" {
   type = string
   default = "es-irsa"
@@ -192,14 +178,6 @@ variable "helm_release_aws_elb_controller_parameter" {
     helm_repo_timeout = 4000
     helm_repo_version = "1.13.0"
   }
-}
-
-variable "helm_release_aws_elb_controller_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
 }
 
 ################################################################################
@@ -232,14 +210,6 @@ variable "helm_release_velero_parameter" {
   }
 }
 
-variable "helm_release_velero_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
-
 variable "helm_release_velero_serviceaccount_name" {
   type = string
   default = "velero-irsa"
@@ -268,12 +238,4 @@ variable "helm_release_metrics_server_controller_parameter" {
     helm_repo_timeout = 4000
     helm_repo_version = ""
   }
-}
-
-variable "helm_release_metrics_server_controller_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
 }
