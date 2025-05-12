@@ -5,6 +5,35 @@ resource "time_static" "one_hour_ahead" {
 }
 
 ###############################################
+#     ArgoCD Helm Chart
+###############################################
+
+resource "helm_release" "argo_cd" {
+  count            = local.create && local.create_argocd ? 1 : 0
+  create_namespace = local.create_argocd_namespace
+
+  chart            = lookup(local.helm_release_argocd_parameter, var.default_helm_repo_parameter.helm_repo_chart, "argo-cd")
+  name             = lookup(local.helm_release_argocd_parameter, var.default_helm_repo_parameter.helm_repo_name, "argo-cd")
+  namespace        = lookup(local.helm_release_argocd_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "argocd")
+  repository       = lookup(local.helm_release_argocd_parameter, var.default_helm_repo_parameter.helm_repo_url, "https://argoproj.github.io/argo-helm")
+  version          = lookup(local.helm_release_argocd_parameter, var.default_helm_repo_parameter.helm_repo_version, "8.0.0")
+  timeout          = lookup(local.helm_release_argocd_parameter, var.default_helm_repo_parameter.helm_repo_timeout, 4000)
+
+  wait             = true
+  wait_for_jobs    = true
+  max_history      = 3
+
+  values = [
+    templatefile("${path.module}/templates/helm/argocd-values.yaml", {
+      argocd_admin_password         = "${bcrypt(aws_ssm_parameter.argo_admin_password[0].value)}",
+      argocd_hostname               = "${local.argocd_endpoint}",
+      argocd_elb_acm_arn            = "${local.create && local.create_argocd && local.create_argocd_cert ? aws_acm_certificate.argo_cert.0.arn: "" }",
+      argo_cd_alb_waf_arn           = "${local.argocd_waf_arn ? "" : ""}",
+    })
+  ]
+}
+
+###############################################
 #     ArgoCD UI secrets
 ###############################################
 resource "aws_ssm_parameter" "argo_admin_password" {

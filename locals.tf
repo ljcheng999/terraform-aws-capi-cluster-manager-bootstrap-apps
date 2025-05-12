@@ -21,6 +21,12 @@ locals {
   helm_release_velero_parameter                       = var.helm_release_velero_parameter
   helm_release_velero_set_parameter                   = var.helm_release_velero_set_parameter
 
+  ### Metrics Server
+  create_metrics_server_controller                    = var.create_metrics_server_controller
+  create_metrics_server_controller_namespace          = var.create_metrics_server_controller_namespace
+  helm_release_metrics_server_controller_parameter     = var.helm_release_metrics_server_controller_parameter
+  helm_release_metrics_server_controller_set_parameter = var.helm_release_metrics_server_controller_set_parameter
+
 
   #######################################################################################
 
@@ -33,11 +39,13 @@ locals {
 
   create_argocd                                       = var.create_argocd
   create_argocd_namespace                             = var.create_argocd_namespace
-  helm_release_argocd_helm_chart_name                 = var.helm_release_argocd_helm_chart_name
-  helm_release_argocd_helm_chart_version              = var.helm_release_argocd_helm_chart_version
-  helm_release_argocd_helm_chart_repo_location        = var.helm_release_argocd_helm_chart_repo_location
-  helm_release_argocd_helm_chart_namespace            = var.helm_release_argocd_helm_chart_namespace
-  helm_release_argocd_timeout                         = var.helm_release_argocd_timeout
+  helm_release_argocd_parameter                       = var.helm_release_argocd_parameter
+  helm_release_argocd_set_parameter                   = var.helm_release_argocd_set_parameter
+
+
+
+
+
   argocd_endpoint                                     = var.argocd_endpoint
   argocd_waf_arn                                      = var.argocd_waf_arn
   argocd_route53_validation_method                    = var.argocd_route53_validation_method

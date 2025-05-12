@@ -45,19 +45,6 @@ variable "cluster_name" {
   default     = ""
 }
 
-################################################################################
-# Helm Charts
-################################################################################
-variable "helm_release_argocd_helm_chart_version" {
-  type        = string
-  default     = "8.0.0"
-}
-
-
-variable "helm_release_velero_helm_revision" {
-  type        = string
-  default     = "8.3.0"
-}
 
 ################################################################################
 # Helm Charts Parameters
@@ -72,6 +59,34 @@ variable "create_argocd_namespace" {
   type        = bool
   default     = true
 }
+
+variable "helm_release_argocd_parameter" {
+  type        = map
+  default     = {}
+}
+
+variable "helm_release_argocd_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+variable "helm_release_argocd_serviceaccount_name" {
+  type = string
+  default = "argocd-irsa"
+}
+
+
+
+
+
+
+
+
+
+
+
 variable "custom_argocd_subdomain" {
   type        = string
   default     = "argocd"
@@ -104,10 +119,7 @@ variable "final_kube_dashboard_acm_domain" {
   type        = string
   default     = ""
 }
-variable "helm_release_argocd_helm_chart_repo_location" {
-  type        = string
-  default     = "https://argoproj.github.io/argo-helm"
-}
+
 variable "argocd_endpoint" {
   description = "endpoint of argocd"
   type        = string
@@ -125,21 +137,6 @@ variable "argocd_route53_validation_method_allow_overwrite" {
 variable "argocd_admin_password_length" {
   type        = number
   default     = 24
-}
-
-variable "helm_release_argocd_helm_chart_name" {
-  type        = string
-  default     = "argo-cd"
-}
-
-variable "helm_release_argocd_helm_chart_namespace" {
-  type        = string
-  default     = "argocd"
-}
-
-variable "helm_release_argocd_timeout" {
-  type        = number
-  default     = 4000
 }
 
 
@@ -246,4 +243,37 @@ variable "helm_release_velero_set_parameter" {
 variable "helm_release_velero_serviceaccount_name" {
   type = string
   default = "velero-irsa"
+}
+
+
+################################################################################
+### Metrics Server
+################################################################################
+
+variable "create_metrics_server_controller" {
+  type        = bool
+  default     = false
+}
+variable "create_metrics_server_controller_namespace" {
+  type        = bool
+  default     = true
+}
+variable "helm_release_metrics_server_controller_parameter" {
+  type        = map
+  default     = {
+    helm_repo_namespace = ""
+    helm_repo_url = ""
+    helm_repo_name = ""
+    helm_repo_crd = ""
+    helm_repo_timeout = 4000
+    helm_repo_version = ""
+  }
+}
+
+variable "helm_release_metrics_server_controller_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
 }
