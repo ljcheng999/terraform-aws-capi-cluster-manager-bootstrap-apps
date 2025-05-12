@@ -75,7 +75,7 @@ helm_release_external_secrets_set_parameter = [
 ]
 
 
-create_velero_controller = false
+create_velero_controller = true
 helm_release_velero_parameter = {
   helm_repo_namespace = "velero"
   helm_repo_url = "https://vmware-tanzu.github.io/helm-charts/"
