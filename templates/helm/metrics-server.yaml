@@ -183,7 +183,6 @@ extraVolumes: []
 
 
 nodeSelector:
-  node.kubesources.com/role: system
   kubernetes.io/os: linux
 
 tolerations:
