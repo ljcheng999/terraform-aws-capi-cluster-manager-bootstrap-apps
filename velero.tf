@@ -57,6 +57,10 @@ resource "kubernetes_service_account" "velero_operator_sa" {
       "eks.amazonaws.com/role-arn" = aws_iam_role.velero_role.arn
     }
   }
+
+  depends_on = [
+    helm_release.velero
+  ]
 }
 
 

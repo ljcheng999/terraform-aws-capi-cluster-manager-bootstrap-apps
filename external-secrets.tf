@@ -45,6 +45,10 @@ resource "kubernetes_service_account" "es_operator_sa" {
       "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
     }
   }
+
+  depends_on = [
+    helm_release.external_secrets
+  ]
 }
 
 
@@ -72,5 +76,8 @@ resource "kubernetes_manifest" "aws_clustersecretstore" {
       }
     }
   }
+  depends_on = [
+    helm_release.external_secrets
+  ]
 }
 
