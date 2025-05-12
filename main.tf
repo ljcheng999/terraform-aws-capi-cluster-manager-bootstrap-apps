@@ -11,7 +11,7 @@ provider "aws" {
 module "capi_cluster_manager_bootstrap_app" {
   # source  = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
   source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
-  version = "1.0.0-beta14"
+  version = "1.0.0-beta15"
 
   create                                           = local.create
   cluster_name                                     = local.cluster_name
@@ -25,7 +25,7 @@ module "capi_cluster_manager_bootstrap_app" {
   ### External Secrets
   create_external_secrets                          = local.create_external_secrets
   helm_release_external_secrets_parameter          = local.helm_release_external_secrets_parameter
-  helm_release_external_secrets_set_parameter      = local.helm_release_external_secrets_set_parameter
+  # helm_release_external_secrets_set_parameter      = local.helm_release_external_secrets_set_parameter
 
   ### Velero
   create_velero_controller                         = local.create_velero_controller

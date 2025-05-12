@@ -39,7 +39,6 @@ helm_release_aws_elb_controller_set_parameter = [
   },
 ]
 
-# node-role.kubernetes.io/control-plane=true:NoSchedule
 
 create_external_secrets = true
 helm_release_external_secrets_parameter = {
@@ -50,24 +49,24 @@ helm_release_external_secrets_parameter = {
   helm_repo_version = "0.16.2"
   helm_repo_crd = null
 }
-helm_release_external_secrets_set_parameter = [
-  {
-    name  = "tolerations[0].key"
-    value = "node.kubesources.com/role"
-  },
-  {
-    name  = "tolerations[0].value"
-    value = "system"
-  },
-  {
-    name  = "tolerations[0].operator"
-    value = "Equal"
-  },
-  {
-    name  = "tolerations[0].effect"
-    value = "NoSchedule"
-  },
-]
+# helm_release_external_secrets_set_parameter = [
+#   {
+#     name  = "tolerations[0].key"
+#     value = "node.kubesources.com/role"
+#   },
+#   {
+#     name  = "tolerations[0].value"
+#     value = "system"
+#   },
+#   {
+#     name  = "tolerations[0].operator"
+#     value = "Equal"
+#   },
+#   {
+#     name  = "tolerations[0].effect"
+#     value = "NoSchedule"
+#   },
+# ]
 
 
 create_velero_controller = true
