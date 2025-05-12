@@ -631,7 +631,6 @@ nodeAgent:
 
   # Node selector to use for the node-agent daemonset. Optional.
   nodeSelector:
-    node-role.kubernetes.io/control-plane: true
     kubernetes.io/os: linux
 
   # Affinity to use with node-agent daemonset. Optional.
