@@ -35,6 +35,24 @@ data "aws_iam_policy_document" "eso_assume_role" {
     }
   }
 }
+data "aws_iam_policy_document" "velero_assume_role" {
+  count = local.create && local.create_velero_controller ? 1 : 0
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    principals {
+      type        = "Federated"
+      identifiers = [
+        data.aws_iam_openid_connect_provider.this[0].arn
+      ]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.this[0].url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:${lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")}:${var.helm_release_velero_serviceaccount_name}"]
+    }
+  }
+}
 
 
 

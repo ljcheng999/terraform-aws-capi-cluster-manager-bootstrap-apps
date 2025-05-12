@@ -53,7 +53,8 @@ resource "kubernetes_manifest" "aws_clustersecretstore" {
     apiVersion = "external-secrets.io/v1beta1"
     kind       = "ClusterSecretStore"
     metadata = {
-      name      = "${var.cluster_name}-cluster-secret-store"
+      name        = "${var.cluster_name}-cluster-secret-store"
+      finalizers  = []
     }
     spec = {
       provider = {
@@ -74,83 +75,3 @@ resource "kubernetes_manifest" "aws_clustersecretstore" {
   }
 }
 
-
-
-
-
-
-
-
-
-
-# resource "kubernetes_manifest" "gitlab_argocd_bfe_core_systems_capi_external_secret" {
-#   computed_fields = [
-#     "metadata.labels",
-#     "metadata.annotations",
-#     "metadata.finalizers"
-#   ]
-
-#   manifest = {
-#     apiVersion = "external-secrets.io/v1beta1"
-#     kind       = "ExternalSecret"
-
-#     metadata = {
-#       namespace   = "argocd"
-#       name        = "gitlab-bfe-core-systems-capi-external-secret-${local.provision_environment}"
-#       finalizers  = []
-#     }
-
-#     spec = {
-
-#       secretStoreRef = {
-#         name = kubernetes_manifest.gitlab_argocd_bfe_core_systems_capi_secret_store.manifest.metadata.name
-#         kind = "SecretStore"
-#       }
-
-#       refreshInterval = "1h"
-
-#       target = {
-#         name = "gitlab-capi-core-systems-https-repo-${local.provision_environment}"
-#         creationPolicy = "Owner"
-#         deletionPolicy = "Delete"
-        
-#         template = {
-#           metadata = {
-#             labels = {
-#               "argocd.argoproj.io/secret-type" = "repo-creds"
-#             }
-#           }
-#         }
-#       }
-
-
-#       data = [
-#         {
-#           secretKey = "url"
-#           remoteRef = {
-#             key = "cluster-manager/${local.prefix}-${local.provision_environment}/gitlab/digitalmarketing/infra/capi-core-systems/capi/creds",
-#             property = "url"
-#           }
-#         },
-#         {
-#           secretKey = "username"
-#           remoteRef = {
-#             key = "cluster-manager/${local.prefix}-${local.provision_environment}/gitlab/digitalmarketing/infra/capi-core-systems/capi/creds",
-#             property = "username"
-#           }
-#         },
-#         {
-#           secretKey = "password"
-#           remoteRef = {
-#             key = "cluster-manager/${local.prefix}-${local.provision_environment}/gitlab/digitalmarketing/infra/capi-core-systems/capi/creds",
-#             property = "password"
-#           }
-#         }
-#       ]
-#     }
-#   }
-
-#   depends_on = [
-#     helm_release.external_secrets,
-#   ]
-# }

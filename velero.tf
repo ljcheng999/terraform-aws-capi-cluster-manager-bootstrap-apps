@@ -31,3 +31,113 @@ resource "helm_release" "velero" {
   })]
 }
 
+resource "aws_iam_policy" "amazon_eks_velero_policy" {
+  name        = "velero-${var.cluster_name}-policy"
+  description = "Policy for ${var.cluster_name} CAPI Cluster Velero policy"
+  policy      = file("${path.module}/templates/aws/velero-policy.json")
+
+  tags = merge(
+    {
+      "Name": "velero-${var.cluster_name}-policy"
+    },
+    var.tags,
+  )
+}
+
+resource "aws_iam_role" "velero_role" {
+  name               = "${var.cluster_name}-eks-velero-operator"
+  assume_role_policy = data.aws_iam_policy_document.velero_assume_role[0].json
+}
+
+resource "kubernetes_service_account" "velero_operator_sa" {
+  metadata {
+    name      = var.helm_release_velero_serviceaccount_name
+    namespace = "${lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")}"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.velero_role.arn
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+# resource "kubernetes_manifest" "aws_velero_external_secret" {
+#   manifest = {
+#     apiVersion = "external-secrets.io/v1beta1"
+#     kind       = "ExternalSecret"
+
+#     metadata = {
+#       namespace   = lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")
+#       name        = "${var.cluster_name}-velero-es"
+#       finalizers  = []
+#     }
+
+#     spec = {
+#       secretStoreRef = {
+#         name = kubernetes_manifest.aws_clustersecretstore.manifest.metadata.name
+#         kind = "ClusterSecretStore"
+#       }
+
+#       refreshInterval = "1h"
+
+#       target = {
+#         name           = "${var.cluster_name}-velero-es"
+#         creationPolicy = "Owner"
+#         deletionPolicy = "Retain"
+        
+#         template = {
+#           # metadata = {
+#           #   labels = {
+#           #     "argocd.argoproj.io/secret-type" = "repo-creds"
+#           #   }
+#           # }
+#         }
+
+#         # template:
+#         #   data:
+#         #     cloud: |
+#         #       [default]
+#         #       aws_access_key_id = {{ .awsAccessKeyID | toString }}
+#         #       aws_secret_access_key = {{ .awsSecretAccessKey | toString }}
+
+#         #       [profile default]
+#         #       region = {{ .awsRegion | toString }}
+#         #   engineVersion: v1
+#         #   mergePolicy: Replace
+#         #   metadata: {}
+#       }
+
+
+#       data = [
+#         {
+#           secretKey = "url"
+#           remoteRef = {
+#             key = "cluster-manager/${local.prefix}-${local.provision_environment}/gitlab/digitalmarketing/infra/capi-core-systems/capi/creds",
+#             property = "url"
+#           }
+#         },
+#         {
+#           secretKey = "username"
+#           remoteRef = {
+#             key = "cluster-manager/${local.prefix}-${local.provision_environment}/gitlab/digitalmarketing/infra/capi-core-systems/capi/creds",
+#             property = "username"
+#           }
+#         },
+#         {
+#           secretKey = "password"
+#           remoteRef = {
+#             key = "cluster-manager/${local.prefix}-${local.provision_environment}/gitlab/digitalmarketing/infra/capi-core-systems/capi/creds",
+#             property = "password"
+#           }
+#         }
+#       ]
+#     }
+#   }
+# }

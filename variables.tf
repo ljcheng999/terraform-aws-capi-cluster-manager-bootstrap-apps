@@ -240,3 +240,8 @@ variable "helm_release_velero_set_parameter" {
   }))
   default = []
 }
+
+variable "helm_release_velero_serviceaccount_name" {
+  type = string
+  default = "velero-irsa"
+}
