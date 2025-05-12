@@ -11,7 +11,7 @@ provider "aws" {
 module "capi_cluster_manager_bootstrap_app" {
   # source  = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
   source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
-  version = "1.0.0-beta13"
+  version = "1.0.0-beta14"
 
   create                                           = local.create
   cluster_name                                     = local.cluster_name
@@ -31,6 +31,11 @@ module "capi_cluster_manager_bootstrap_app" {
   create_velero_controller                         = local.create_velero_controller
   helm_release_velero_parameter                    = local.helm_release_velero_parameter
   helm_release_velero_set_parameter                = local.helm_release_velero_set_parameter
+
+  ### Metrics Server
+  create_metrics_server_controller                 = local.create_metrics_server_controller
+  helm_release_metrics_server_controller_parameter = local.helm_release_metrics_server_controller_parameter
+
 
 
 
@@ -53,7 +58,7 @@ module "capi_cluster_manager_bootstrap_app" {
   argocd_waf_arn                                   = local.argocd_waf_arn
 
   public_subnet_ids                                = local.public_subnet_ids
-  helm_release_argocd_helm_chart_version           = local.helm_release_argocd_helm_chart_version
+
 
 
   

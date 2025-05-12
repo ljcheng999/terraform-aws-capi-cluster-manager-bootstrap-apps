@@ -99,11 +99,6 @@ variable "cluster_name" {
 }
 
 
-
-
-
-
-
 variable "create_argocd" {
   type        = bool
   default     = false
@@ -243,6 +238,38 @@ variable "helm_release_velero_parameter" {
 }
 
 variable "helm_release_velero_set_parameter" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+################################################################################
+### Metrics Server
+################################################################################
+
+variable "create_metrics_server_controller" {
+  type        = bool
+  default     = false
+}
+variable "create_metrics_server_controller_namespace" {
+  type        = bool
+  default     = true
+}
+variable "helm_release_metrics_server_controller_parameter" {
+  type        = map
+  default     = {
+    helm_repo_namespace = ""
+    helm_repo_url = ""
+    helm_repo_name = ""
+    helm_repo_crd = ""
+    helm_repo_timeout = 4000
+    helm_repo_version = ""
+  }
+}
+
+variable "helm_release_metrics_server_controller_set_parameter" {
   type = list(object({
     name  = string
     value = string

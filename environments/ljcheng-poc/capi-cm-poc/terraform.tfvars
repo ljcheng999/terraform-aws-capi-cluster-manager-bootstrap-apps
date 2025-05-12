@@ -3,14 +3,7 @@ addition_tags = {}
 
 create       = true
 cluster_name = "capi-cm-poc"
-
-### ArgoCD
-create_argocd = false
-create_argocd_cert = false
-create_wildcard_argocd_cert = false
-helm_release_argocd_helm_chart_version = "8.0.0"
-
-
+route53_zone_id = "Z02763451I8QENECRLHM9"
 
 
 ### AWS ELB
@@ -111,5 +104,23 @@ helm_release_velero_set_parameter = [
   },
 ]
 
+create_metrics_server_controller = true
+helm_release_metrics_server_controller_parameter = {
+  helm_repo_chart = "metrics-server"
+  helm_repo_namespace = "metrics-server"
+  helm_repo_url = "https://kubernetes-sigs.github.io/metrics-server/"
+  helm_repo_name = "metrics-server"
+  helm_repo_crd = null
+  helm_repo_timeout = 4000
+  helm_repo_version = "3.12.2"
+}
 
-route53_zone_id = "Z02763451I8QENECRLHM9"
+
+
+
+
+### ArgoCD
+create_argocd = false
+create_argocd_cert = false
+create_wildcard_argocd_cert = false
+helm_release_argocd_helm_chart_version = "8.0.0"
