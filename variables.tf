@@ -24,6 +24,7 @@ variable "default_helm_repo_parameter" {
   type        = map
   default     = {
     create_namespace    = "create_namespace"
+    helm_repo_chart     = "helm_repo_chart"
     helm_repo_name      = "helm_repo_name_key"
     helm_repo_timeout   = "helm_repo_timeout"
     helm_repo_namespace = "helm_repo_namespace"
@@ -219,6 +220,7 @@ variable "create_velero_namespace" {
 variable "helm_release_velero_parameter" {
   type        = map
   default     = {
+    helm_repo_chart = ""
     helm_repo_namespace = ""
     helm_repo_url = ""
     helm_repo_name = ""

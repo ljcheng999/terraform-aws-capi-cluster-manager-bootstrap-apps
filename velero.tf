@@ -3,7 +3,7 @@ resource "helm_release" "velero" {
   count            = local.create && local.create_velero_controller ? 1 : 0
   create_namespace = local.create_velero_namespace
 
-  chart            = lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_name, "vmware-tanzu")
+  chart            = lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_chart, "velero")
   name             = lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_name, "velero")
   namespace        = lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")
   repository       = lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_url, "https://vmware-tanzu.github.io/helm-charts/")
