@@ -16,6 +16,7 @@ helm_release_argocd_helm_chart_version = "8.0.0"
 ### AWS ELB
 create_aws_elb_controller = true
 helm_release_aws_elb_controller_parameter = {
+  helm_repo_chart = "aws-load-balancer-controller"
   helm_repo_namespace = "nginx"
   helm_repo_url = "https://aws.github.io/eks-charts"
   helm_repo_name = "aws-load-balancer-controller"
@@ -49,6 +50,7 @@ helm_release_aws_elb_controller_set_parameter = [
 
 create_external_secrets = true
 helm_release_external_secrets_parameter = {
+  helm_repo_chart = "external-secrets"
   helm_repo_namespace = "external-secrets"
   helm_repo_url = "https://charts.external-secrets.io"
   helm_repo_name = "external-secrets"
@@ -77,6 +79,7 @@ helm_release_external_secrets_set_parameter = [
 
 create_velero_controller = true
 helm_release_velero_parameter = {
+  helm_repo_chart = "velero"
   helm_repo_namespace = "velero"
   helm_repo_url = "https://vmware-tanzu.github.io/helm-charts"
   helm_repo_name = "velero"
