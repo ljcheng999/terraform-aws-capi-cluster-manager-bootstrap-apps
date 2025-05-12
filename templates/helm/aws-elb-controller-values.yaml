@@ -124,7 +124,7 @@ certManager:
   renewBefore:
 
 # The name of the Kubernetes cluster. A non-empty value is required
-clusterName: 
+clusterName: ${cluster_name}
 
 # cluster contains configurations specific to the kubernetes cluster
 cluster:

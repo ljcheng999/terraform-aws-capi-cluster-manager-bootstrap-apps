@@ -16,5 +16,7 @@ resource "helm_release" "aws_elb_controller" {
   wait_for_jobs    = true
   max_history      = 3
 
-  values = [templatefile("${path.module}/templates/helm/aws-elb-controller-values.yaml", {})]
+  values = [templatefile("${path.module}/templates/helm/aws-elb-controller-values.yaml", {
+    cluster_name = "${var.cluster_name}"
+  })]
 }
