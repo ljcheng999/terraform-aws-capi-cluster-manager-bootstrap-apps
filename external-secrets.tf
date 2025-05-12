@@ -14,17 +14,15 @@ resource "helm_release" "external_secrets" {
   wait_for_jobs    = true
   max_history      = 3
   
-  dynamic "set" {
-   for_each = length(local.helm_release_external_secrets_set_parameter) > 0 ? local.helm_release_external_secrets_set_parameter : []
-    content {
-      name = set.value.name
-      value = set.value.value
-    }
-  }
+  # dynamic "set" {
+  #  for_each = length(local.helm_release_external_secrets_set_parameter) > 0 ? local.helm_release_external_secrets_set_parameter : []
+  #   content {
+  #     name = set.value.name
+  #     value = set.value.value
+  #   }
+  # }
 
-  # values = [
-  #   "${file("${path.module}/templates/helm/external-secrets-values.yaml")}",
-  # ]
+  values = [templatefile("${path.module}/templates/helm/external-secrets-values.yaml", {})]
 }
 
 resource "aws_iam_role_policy_attachment" "eso_policy_attachment" {
