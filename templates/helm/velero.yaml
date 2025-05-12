@@ -669,6 +669,25 @@ schedules:
   continuous:
     disabled: false
     schedule: "*/15 * * * *"
+    useOwnerReferencesInBackup: false
+    template:
+      ttl: 168h
+      includeClusterResources: true
+      excludedNamespaces:
+        - aws-load-balancer
+        - cert-manager
+        - datadog
+        - default
+        - external-dns
+        - external-secrets
+        - kube-node-lease
+        - kube-public
+        - kube-state-metrics
+        - kube-system
+        - kyverno
+        - metrics-server
+        - splunk
+        - velero
   frequent:
     disabled: false
     schedule: "0 */8 * * *"
