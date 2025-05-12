@@ -54,7 +54,6 @@ resource "kubernetes_manifest" "aws_clustersecretstore" {
     kind       = "ClusterSecretStore"
     metadata = {
       name        = "${var.cluster_name}-cluster-secret-store"
-      finalizers  = []
     }
     spec = {
       provider = {
