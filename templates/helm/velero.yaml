@@ -62,7 +62,7 @@ labels: {}
 # If using kube2iam or kiam, use the following annotation with your AWS_ACCOUNT_ID
 # and VELERO_ROLE_NAME filled in:
 podAnnotations: {}
-  #  iam.amazonaws.com/role: "arn:aws:iam::<AWS_ACCOUNT_ID>:role/<VELERO_ROLE_NAME>"
+  # iam.amazonaws.com/role: ${cloud_irsa_arn}
 
 # Additional pod labels for Velero deployment's template. Optional
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -506,8 +506,9 @@ rbac:
 serviceAccount:
   server:
     create: true
-    name:
+    name: ${cloud_irsa_name}
     annotations:
+      eks.amazonaws.com/role-arn: ${cloud_irsa_arn}
     labels:
     imagePullSecrets: []
     # - registrySecretName

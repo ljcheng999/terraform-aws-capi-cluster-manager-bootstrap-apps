@@ -27,7 +27,9 @@ resource "helm_release" "velero" {
     cloud_bucket              = lookup(local.helm_release_velero_parameter, "cloud_bucket", "ljc-cluster-backups")
     cloud_bucket_folder_name  = lookup(local.helm_release_velero_parameter, "cloud_bucket_folder_name", "core-kubesources-cluster-backups")
     cloud_region              = lookup(local.helm_release_velero_parameter, "cloud_region", "us-east-1")
-    cloud_bucket_prefix       = var.cluster_name
+    cloud_bucket_prefix       = "${var.cluster_name}"
+    cloud_irsa_name           = "${var.helm_release_velero_serviceaccount_name}"
+    cloud_irsa_arn            = "${aws_iam_role.velero_role[0].arn}"
   })]
 }
 
@@ -57,20 +59,20 @@ resource "aws_iam_role" "velero_role" {
   assume_role_policy = data.aws_iam_policy_document.velero_assume_role[0].json
 }
 
-resource "kubernetes_service_account" "velero_operator_sa" {
-  count       = local.create && local.create_velero_controller ? 1 : 0
-  metadata {
-    name      = var.helm_release_velero_serviceaccount_name
-    namespace = "${lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")}"
-    annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.velero_role[0].arn
-    }
-  }
+# resource "kubernetes_service_account" "velero_operator_sa" {
+#   count       = local.create && local.create_velero_controller ? 1 : 0
+#   metadata {
+#     name      = var.helm_release_velero_serviceaccount_name
+#     namespace = "${lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")}"
+#     annotations = {
+#       "eks.amazonaws.com/role-arn" = aws_iam_role.velero_role[0].arn
+#     }
+#   }
 
-  depends_on = [
-    helm_release.velero
-  ]
-}
+#   depends_on = [
+#     helm_release.velero
+#   ]
+# }
 
 
 
