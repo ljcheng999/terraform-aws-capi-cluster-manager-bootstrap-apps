@@ -193,13 +193,13 @@ variable "helm_release_aws_elb_controller_parameter" {
   default     = {}
 }
 
-variable "helm_release_aws_elb_controller_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
+# variable "helm_release_aws_elb_controller_set_parameter" {
+#   type = list(object({
+#     name  = string
+#     value = string
+#   }))
+#   default = []
+# }
 
 ################################################################################
 ### External Secrets
@@ -215,14 +215,6 @@ variable "helm_release_external_secrets_parameter" {
   default     = {}
 }
 
-variable "helm_release_external_secrets_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
-
 ################################################################################
 ### Velero
 ################################################################################
@@ -235,14 +227,6 @@ variable "create_velero_controller" {
 variable "helm_release_velero_parameter" {
   type        = map
   default     = {}
-}
-
-variable "helm_release_velero_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
 }
 
 ################################################################################
@@ -267,12 +251,4 @@ variable "helm_release_metrics_server_controller_parameter" {
     helm_repo_timeout = 4000
     helm_repo_version = ""
   }
-}
-
-variable "helm_release_metrics_server_controller_set_parameter" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
 }
