@@ -28,21 +28,24 @@ resource "helm_release" "external_secrets" {
 }
 
 resource "aws_iam_role_policy_attachment" "eso_policy_attachment" {
-  role       = aws_iam_role.eso.name
+  count      = local.create && local.create_external_secrets ? 1 : 0
+  role       = aws_iam_role.eso[0].name
   policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 }
 
 resource "aws_iam_role" "eso" {
+  count              = local.create && local.create_external_secrets ? 1 : 0
   name               = "${var.cluster_name}-eks-external-secrets-operator"
   assume_role_policy = data.aws_iam_policy_document.eso_assume_role[0].json
 }
 
 resource "kubernetes_service_account" "es_operator_sa" {
+  count       = local.create && local.create_external_secrets ? 1 : 0
   metadata {
     name      = var.helm_release_external_secrets_serviceaccount_name
     namespace = "${lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")}"
     annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.eso.arn
+      "eks.amazonaws.com/role-arn" = aws_iam_role.eso[0].arn
     }
   }
 
@@ -65,7 +68,7 @@ resource "kubernetes_manifest" "aws_clustersecretstore" {
           auth = {
             jwt = {
               serviceAccountRef = {
-                name = "${kubernetes_service_account.es_operator_sa.metadata[0].name}"
+                name = "${kubernetes_service_account.es_operator_sa[0].metadata[0].name}"
                 namespace = lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")
               }
             }

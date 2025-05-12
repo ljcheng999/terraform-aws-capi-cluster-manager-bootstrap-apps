@@ -32,7 +32,8 @@ resource "helm_release" "velero" {
 }
 
 resource "aws_iam_policy" "amazon_eks_velero_policy" {
-  name        = "velero-${var.cluster_name}-policy"
+  count       = local.create && local.create_velero_controller ? 1 : 0
+  name        = "${var.cluster_name}-eks-velero-operator-policy"
   description = "Policy for ${var.cluster_name} CAPI Cluster Velero policy"
   policy      = file("${path.module}/templates/aws/velero-policy.json")
 
@@ -44,17 +45,25 @@ resource "aws_iam_policy" "amazon_eks_velero_policy" {
   )
 }
 
+resource "aws_iam_role_policy_attachment" "test-attach" {
+  count      = local.create && local.create_velero_controller ? 1 : 0
+  role       = "${var.cluster_name}-eks-velero-operator"
+  policy_arn = aws_iam_policy.amazon_eks_velero_policy[0].arn
+}
+
 resource "aws_iam_role" "velero_role" {
+  count              = local.create && local.create_velero_controller ? 1 : 0
   name               = "${var.cluster_name}-eks-velero-operator"
   assume_role_policy = data.aws_iam_policy_document.velero_assume_role[0].json
 }
 
 resource "kubernetes_service_account" "velero_operator_sa" {
+  count       = local.create && local.create_velero_controller ? 1 : 0
   metadata {
     name      = var.helm_release_velero_serviceaccount_name
     namespace = "${lookup(local.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")}"
     annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.velero_role.arn
+      "eks.amazonaws.com/role-arn" = aws_iam_role.velero_role[0].arn
     }
   }
 
