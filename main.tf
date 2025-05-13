@@ -13,6 +13,7 @@ module "capi_cluster_manager_bootstrap_app" {
   source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
   version = "1.0.1"
 
+
   create                                           = local.create
   cluster_name                                     = local.cluster_name
   route53_zone_id                                  = local.route53_zone_id
