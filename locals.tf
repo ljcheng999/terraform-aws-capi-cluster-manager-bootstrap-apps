@@ -14,10 +14,15 @@ locals {
   create                                           = var.create
   cluster_name                                     = var.cluster_name
   route53_zone_id                                  = var.route53_zone_id
+  custom_domain                                    = var.custom_domain
 
   ### AWS ELB
   create_aws_elb_controller                        = var.create_aws_elb_controller
   helm_release_aws_elb_controller_parameter        = var.helm_release_aws_elb_controller_parameter
+
+  ### AWS ALB INGRESS
+  create_aws_alb_ingress                           = var.create_aws_alb_ingress
+  aws_alb_ingress_parameter                        = var.aws_alb_ingress_parameter
 
   ### External Secrets
   create_external_secrets                          = var.create_external_secrets

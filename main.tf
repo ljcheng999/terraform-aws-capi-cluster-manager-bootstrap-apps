@@ -9,17 +9,22 @@ provider "aws" {
 
 
 module "capi_cluster_manager_bootstrap_app" {
-  source  = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
-  # source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
-  # version = "1.0.0-beta18"
+  # source  = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
+  source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
+  version = "1.0.0"
 
   create                                           = local.create
   cluster_name                                     = local.cluster_name
   route53_zone_id                                  = local.route53_zone_id
+  custom_domain                                    = local.custom_domain
   
   ### AWS ELB
   create_aws_elb_controller                        = local.create_aws_elb_controller
   helm_release_aws_elb_controller_parameter        = local.helm_release_aws_elb_controller_parameter
+
+  ### AWS ALB INGRESS
+  create_aws_alb_ingress                           = local.create_aws_alb_ingress
+  aws_alb_ingress_parameter                        = local.aws_alb_ingress_parameter
 
   ### External Secrets
   create_external_secrets                          = local.create_external_secrets

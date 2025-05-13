@@ -4,6 +4,8 @@ addition_tags = {}
 create       = true
 cluster_name = "capi-cm-poc"
 route53_zone_id = "Z02763451I8QENECRLHM9"
+custom_domain = "kubesources.com"
+
 
 
 ### AWS ELB
@@ -17,15 +19,18 @@ helm_release_aws_elb_controller_parameter = {
   helm_repo_crd = null
 }
 
+create_aws_alb_ingress = false
+aws_alb_ingress_parameter = {}
+
 
 create_external_secrets = true
 helm_release_external_secrets_parameter = {
   helm_repo_chart = "external-secrets"
   helm_repo_namespace = "external-secrets"
   helm_repo_url = "https://charts.external-secrets.io"
+  helm_repo_crd = null
   helm_repo_name = "external-secrets"
   helm_repo_version = "0.16.2"
-  helm_repo_crd = null
 }
 
 
@@ -36,7 +41,6 @@ helm_release_velero_parameter = {
   helm_repo_url = "https://vmware-tanzu.github.io/helm-charts"
   helm_repo_name = "velero"
   helm_repo_crd = null
-  helm_repo_timeout = 4000
   helm_repo_version = "9.1.0"
   cloud_provider = "aws"
   cloud_bucket  = "velero-ljcheng-cluster-backups"
@@ -52,7 +56,6 @@ helm_release_metrics_server_controller_parameter = {
   helm_repo_url = "https://kubernetes-sigs.github.io/metrics-server/"
   helm_repo_name = "metrics-server"
   helm_repo_crd = null
-  helm_repo_timeout = 4000
   helm_repo_version = "3.12.2"
 }
 
