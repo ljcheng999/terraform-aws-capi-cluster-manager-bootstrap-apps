@@ -44,25 +44,54 @@ resource "kubernetes_service_account" "es_operator_sa" {
   ]
 }
 
-resource "kubectl_manifest" "aws_clustersecretstore" {
-  yaml_body  = <<-EOF
-    apiVersion: external-secrets.io/v1beta1
-    kind: ClusterSecretStore
-    metadata:
-      name: "${var.cluster_name}-cluster-secret-store"
-    spec:
-      provider:
-        aws:
-          auth:
-            jwt:
-              serviceAccountRef:
-                name: "${kubernetes_service_account.es_operator_sa[0].metadata[0].name}"
-                namespace: ${lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")}
-          service: ${lookup(local.helm_release_external_secrets_parameter, "service", "SecretsManager")}
-          region: ${lookup(local.helm_release_external_secrets_parameter, "region", "us-east-1")}
-    EOF
-
+resource "kubernetes_manifest" "aws_clustersecretstore" {
+  manifest = {
+    apiVersion = "external-secrets.io/v1beta1"
+    kind       = "ClusterSecretStore"
+    metadata = {
+      name        = "${var.cluster_name}-cluster-secret-store"
+    }
+    spec = {
+      provider = {
+        aws = {
+          auth = {
+            jwt = {
+              serviceAccountRef = {
+                name = "${kubernetes_service_account.es_operator_sa[0].metadata[0].name}"
+                namespace = lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")
+              }
+            }
+          }
+          service = lookup(local.helm_release_external_secrets_parameter, "service", "SecretsManager")
+          region  = lookup(local.helm_release_external_secrets_parameter, "region", "us-east-1")
+        }
+      }
+    }
+  }
   depends_on = [
     helm_release.external_secrets
   ]
 }
+
+# resource "kubectl_manifest" "aws_clustersecretstore" {
+#   yaml_body  = <<-EOF
+#     apiVersion: external-secrets.io/v1beta1
+#     kind: ClusterSecretStore
+#     metadata:
+#       name: "${var.cluster_name}-cluster-secret-store"
+#     spec:
+#       provider:
+#         aws:
+#           auth:
+#             jwt:
+#               serviceAccountRef:
+#                 name: "${kubernetes_service_account.es_operator_sa[0].metadata[0].name}"
+#                 namespace: ${lookup(local.helm_release_external_secrets_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "external-secrets")}
+#           service: ${lookup(local.helm_release_external_secrets_parameter, "service", "SecretsManager")}
+#           region: ${lookup(local.helm_release_external_secrets_parameter, "region", "us-east-1")}
+#     EOF
+
+#   depends_on = [
+#     helm_release.external_secrets
+#   ]
+# }
