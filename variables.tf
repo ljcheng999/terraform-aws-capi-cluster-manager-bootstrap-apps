@@ -23,14 +23,13 @@ variable "route53_zone_id" {
 variable "default_helm_repo_parameter" {
   type        = map
   default     = {
-    create_namespace    = "create_namespace"
     helm_repo_chart     = "helm_repo_chart"
     helm_repo_name      = "helm_repo_name_key"
-    helm_repo_timeout   = "helm_repo_timeout"
     helm_repo_namespace = "helm_repo_namespace"
     helm_repo_url       = "helm_repo_url"
     helm_repo_version   = "helm_repo_version"
     helm_repo_timeout   = 4000
+    helm_repo_crd       = null
   }
 }
 
