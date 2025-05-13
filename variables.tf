@@ -179,6 +179,32 @@ variable "helm_release_aws_elb_controller_parameter" {
   }
 }
 
+variable "create_aws_alb_ingress" {
+  type        = bool
+  default     = false
+}
+
+variable "default_aws_alb_ingress_parameter" {
+  type        = map
+  default     = {
+    aws_alb_ingress_namespace = "aws_alb_ingress_namespace"
+    aws_alb_ingress_name      = "aws_alb_ingress_name"
+    aws_alb_ingress_classname = "aws_alb_ingress_classname"
+    aws_alb_ingress_waf_arn   = "aws_alb_ingress_waf_arn"
+    aws_alb_ingress_healthcheck_path = "aws_alb_ingress_healthcheck_path"
+    aws_alb_ingress_load_balancer_attributes = "aws_alb_ingress_load_balancer_attributes"
+    aws_alb_ingress_certificate_arn = "aws_alb_ingress_certificate_arn"
+    aws_alb_ingress_scheme = "aws_alb_ingress_scheme"
+    aws_alb_ingress_success_codes = "aws_alb_ingress_success_codes"
+    aws_alb_ingress_target_type = "aws_alb_ingress_target_type"
+  }
+}
+
+variable "aws_alb_ingress_parameter" {
+  type        = map
+  default     = {}
+}
+
 ################################################################################
 ### Velero Controller
 ################################################################################

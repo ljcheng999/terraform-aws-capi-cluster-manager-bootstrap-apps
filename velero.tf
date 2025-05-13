@@ -39,7 +39,7 @@ resource "aws_iam_policy" "amazon_eks_velero_policy" {
   )
 }
 
-resource "aws_iam_role_policy_attachment" "test-attach" {
+resource "aws_iam_role_policy_attachment" "velero_irsa_policy_attachment" {
   count      = local.create && local.create_velero_controller ? 1 : 0
   role       = "${var.cluster_name}-eks-velero-operator"
   policy_arn = aws_iam_policy.amazon_eks_velero_policy[0].arn
