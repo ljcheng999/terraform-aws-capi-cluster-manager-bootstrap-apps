@@ -49,7 +49,8 @@ global:
   runtimeClassName: ""
 
   # -- Common labels for the all resources
-  additionalLabels: {}
+  additionalLabels:
+    {}
     # app: argo-cd
 
   # -- Number of old deployment ReplicaSets to retain. The rest will be garbage collected.
@@ -125,9 +126,12 @@ global:
 
   # -- Default tolerations for all components
   tolerations:
-  - key: node.kubesources.com/role
-    value: "system"
-    effect: "NoSchedule"
+    - key: node.kubesources.com/role
+      value: "system"
+      effect: "NoSchedule"
+    - key: node-role.kubernetes.io/control-plane
+      value: "true"
+      effect: "NoSchedule"
 
   # Default affinity preset for all components
   affinity:
@@ -138,20 +142,20 @@ global:
       # -- Default node affinity rules. Either: `none`, `soft` or `hard`
       type: hard
       # -- Default match expressions for node affinity
-      matchExpressions:
-        - key: node.kubesources.com/role
-          operator: Exists
+      matchExpressions: []
 
   # -- Default [TopologySpreadConstraints] rules for all components
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector of the component
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
 
   # -- Deployment strategy for the all deployed Deployments
-  deploymentStrategy: {}
+  deploymentStrategy:
+    {}
     # type: RollingUpdate
     # rollingUpdate:
     #   maxSurge: 25%
@@ -278,7 +282,8 @@ configs:
         - '.metadata.annotations."notified.notifications.argoproj.io"'
     # -- Legacy annotations used on HPA autoscaling/v1
     # @default -- See [values.yaml]
-    resource.customizations.ignoreResourceUpdates.autoscaling_HorizontalPodAutoscaler: |
+    resource.customizations.ignoreResourceUpdates.autoscaling_HorizontalPodAutoscaler:
+      |
       jqPathExpressions:
         - '.metadata.annotations."autoscaling.alpha.kubernetes.io/behavior"'
         - '.metadata.annotations."autoscaling.alpha.kubernetes.io/conditions"'
@@ -301,7 +306,8 @@ configs:
         - '.metadata.annotations."rollout.argoproj.io/desired-replicas"'
     # -- Ignores update if EndpointSlice is not excluded globally
     # @default -- See [values.yaml]
-    resource.customizations.ignoreResourceUpdates.discovery.k8s.io_EndpointSlice: |
+    resource.customizations.ignoreResourceUpdates.discovery.k8s.io_EndpointSlice:
+      |
       jsonPointers:
         - /metadata
         - /endpoints
@@ -377,7 +383,6 @@ configs:
         - ClusterBackgroundScanReport
         - UpdateRequest
 
-
   # Argo CD configuration parameters
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/argocd-cmd-params-cm.yaml
   params:
@@ -390,7 +395,7 @@ configs:
 
     ## Generic parameters
     # -- Open-Telemetry collector address: (e.g. "otel-collector:4317")
-    otlp.address: ''
+    otlp.address: ""
 
     ## Controller Properties
     # -- Number of application status processors
@@ -411,7 +416,7 @@ configs:
     # -- Value for base href in index.html. Used if Argo CD is running behind reverse proxy under subpath different from /
     server.basehref: /
     # -- Used if Argo CD is running behind reverse proxy under subpath different from /
-    server.rootpath: ''
+    server.rootpath: ""
     # -- Directory path that contains additional static assets
     server.staticassets: /shared/app
     # -- Disable Argo CD RBAC for user authentication
@@ -462,11 +467,11 @@ configs:
 
     # -- The name of the default role which Argo CD will falls back to, when authorizing API requests (optional).
     # If omitted or empty, users may be still be able to login, but will see no apps, projects, etc...
-    policy.default: ''
+    policy.default: ""
 
     # -- File containing user-defined policies and role definitions.
     # @default -- `''` (See [values.yaml])
-    policy.csv: ''
+    policy.csv: ""
     # Policy rules are in the form:
     #  p, subject, resource, action, object, effect
     # Role definitions and bindings are in the form:
@@ -495,7 +500,8 @@ configs:
     # -- [GnuPG] public keys to add to the keyring
     # @default -- `{}` (See [values.yaml])
     ## Note: Public keys should be exported with `gpg --export --armor <KEY>`
-    keys: {}
+    keys:
+      {}
       # 4AEE18F83AFDEB23: |
       #   -----BEGIN PGP PUBLIC KEY BLOCK-----
       #   ...
@@ -529,7 +535,7 @@ configs:
       vs-ssh.visualstudio.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
 
     # -- Additional known hosts for private repositories
-    extraHosts: ''
+    extraHosts: ""
 
   # Repository TLS certificates
   # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#repositories-using-self-signed-tls-certificates-or-are-signed-by-custom-ca
@@ -539,7 +545,8 @@ configs:
 
     # -- TLS certificates for Git repositories
     # @default -- `{}` (See [values.yaml])
-    certificates: {}
+    certificates:
+      {}
       # server.example.com: |
       #   -----BEGIN CERTIFICATE-----
       #   ...
@@ -558,7 +565,8 @@ configs:
     annotations: {}
 
     # -- Plugin yaml files to be added to argocd-cmp-cm
-    plugins: {}
+    plugins:
+      {}
       # --- First plugin
       # my-plugin:
       #   init:
@@ -597,7 +605,8 @@ configs:
   ## - https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#clusters
   ## - https://argo-cd.readthedocs.io/en/stable/operator-manual/security/#external-cluster-credentials
   ## - https://argo-cd.readthedocs.io/en/stable/user-guide/projects/#project-scoped-repositories-and-clusters
-  clusterCredentials: {}
+  clusterCredentials:
+    {}
     # mycluster:
     #   server: https://mycluster.example.com
     #   labels: {}
@@ -641,7 +650,8 @@ configs:
 
   # -- Repository credentials to be used as Templates for other repos
   ## Creates a secret for each key/value specified below to create repository credentials
-  credentialTemplates: {}
+  credentialTemplates:
+    {}
     # github-enterprise-creds-1:
     #   url: https://github.com/argoproj
     #   githubAppID: 1
@@ -668,7 +678,8 @@ configs:
   # -- Repositories list to be used by applications
   ## Creates a secret for each key/value specified below to create repositories
   ## Note: the last example in the list would use a repository credential template, configured under "configs.credentialTemplates".
-  repositories: {}
+  repositories:
+    {}
     # istio-helm-repo:
     #   url: https://storage.googleapis.com/istio-prerelease/daily-build/master-latest-daily/charts
     #   name: istio.io
@@ -740,7 +751,8 @@ configs:
 
 # -- Array of extra K8s manifests to deploy
 ## Note: Supports use of custom Helm templates
-extraObjects: []
+extraObjects:
+  []
   # - apiVersion: secrets-store.csi.x-k8s.io/v1
   #   kind: SecretProviderClass
   #   metadata:
@@ -926,7 +938,7 @@ controller:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   # Readiness probe for application controller
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -965,7 +977,8 @@ controller:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
@@ -1021,7 +1034,8 @@ controller:
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
       metricRelabelings: []
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
 
       # -- Prometheus ServiceMonitor scheme
@@ -1040,7 +1054,8 @@ controller:
       # -- PrometheusRule namespace
       namespace: "" # "monitoring"
       # -- PrometheusRule selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
 
       # -- PrometheusRule labels
@@ -1119,7 +1134,8 @@ dex:
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
       metricRelabelings: []
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
 
       # -- Prometheus ServiceMonitor scheme
@@ -1227,11 +1243,11 @@ dex:
     # -- Annotations to be added to argocd-dex-server-tls secret
     annotations: {}
     # -- Certificate authority. Required for self-signed certificates.
-    ca: ''
+    ca: ""
     # -- Certificate private key
-    key: ''
+    key: ""
     # -- Certificate data. Must contain SANs of Dex service (ie: argocd-dex-server, argocd-dex-server.argo-cd.svc)
-    crt: ''
+    crt: ""
 
   # -- Annotations to be added to the Dex server Deployment
   deploymentAnnotations: {}
@@ -1276,7 +1292,7 @@ dex:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Probes for Dex server
   ## Supported from Dex >= 2.28.0
@@ -1367,13 +1383,15 @@ dex:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
 
   # -- Deployment strategy to be added to the Dex server Deployment
-  deploymentStrategy: {}
+  deploymentStrategy:
+    {}
     # type: RollingUpdate
     # rollingUpdate:
     #   maxSurge: 25%
@@ -1390,7 +1408,7 @@ dex:
 ## Redis
 redis:
   # -- Enable redis
-  enabled: true
+  enabled: false
   # -- Redis name
   name: redis
 
@@ -1451,7 +1469,7 @@ redis:
         type: RuntimeDefault
       capabilities:
         drop:
-        - ALL
+          - ALL
 
     ## Probes for Redis exporter (optional)
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -1483,7 +1501,8 @@ redis:
       failureThreshold: 5
 
     # -- Resource limits and requests for redis-exporter sidecar
-    resources: {}
+    resources:
+      {}
       # limits:
       #   cpu: 50m
       #   memory: 64Mi
@@ -1599,7 +1618,7 @@ redis:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   # -- Redis service port
   servicePort: 6379
@@ -1624,7 +1643,8 @@ redis:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
@@ -1682,7 +1702,8 @@ redis:
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
       metricRelabelings: []
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
 
       # -- Prometheus ServiceMonitor scheme
@@ -1910,7 +1931,8 @@ server:
     # -- Average memory utilization percentage for the Argo CD server [HPA]
     targetMemoryUtilizationPercentage: 50
     # -- Configures the scaling behavior of the target in both Up and Down directions.
-    behavior: {}
+    behavior:
+      {}
       # scaleDown:
       #  stabilizationWindowSeconds: 300
       #  policies:
@@ -2017,7 +2039,7 @@ server:
         type: RuntimeDefault
       capabilities:
         drop:
-        - ALL
+          - ALL
 
     # -- Resource limits and requests for the argocd-extensions container
     resources: {}
@@ -2129,7 +2151,7 @@ server:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Readiness and liveness probes for default backend
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -2180,13 +2202,15 @@ server:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
 
   # -- Deployment strategy to be added to the server Deployment
-  deploymentStrategy: {}
+  deploymentStrategy:
+    {}
     # type: RollingUpdate
     # rollingUpdate:
     #   maxSurge: 25%
@@ -2247,9 +2271,9 @@ server:
     # -- Labels to be added to argocd-server-tls secret
     labels: {}
     # -- Private Key of the certificate
-    key: ''
+    key: ""
     # -- Certificate data
-    crt: ''
+    crt: ""
 
   ## Server service configuration
   service:
@@ -2322,7 +2346,8 @@ server:
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
       metricRelabelings: []
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
 
       # -- Prometheus ServiceMonitor scheme
@@ -2330,7 +2355,7 @@ server:
       # -- Prometheus ServiceMonitor tlsConfig
       tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
-      namespace: ""  # monitoring
+      namespace: "" # monitoring
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor annotations
@@ -2354,7 +2379,7 @@ server:
   # Argo CD server ingress configuration
   ingress:
     # -- Enable an ingress resource for the Argo CD server
-    enabled: false
+    enabled: true
     # -- Specific implementation for ingress controller. One of `generic`, `aws` or `gke`
     ## Additional configuration might be required in related configuration sections
     controller: generic
@@ -2362,16 +2387,17 @@ server:
     labels: {}
     # -- Additional ingress annotations
     ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-1-ssl-passthrough
-    annotations: {}
+    annotations:
+      {}
       # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
       # nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 
     # -- Defines which ingress controller will implement the resource
-    ingressClassName: "argo"
+    ingressClassName: ${argocd_ingressclassname}
 
     # -- Argo CD server hostname
     # @default -- `""` (defaults to global.domain)
-    hostname: ""
+    hostname: ${argocd_hostname}
 
     # -- The path to Argo CD server
     path: /
@@ -2386,14 +2412,16 @@ server:
 
     # -- The list of additional hostnames to be covered by ingress record
     # @default -- `[]` (See [values.yaml])
-    extraHosts: []
+    extraHosts:
+      []
       # - name: argocd.example.com
       #   path: /
 
     # -- Additional ingress paths
     # @default -- `[]` (See [values.yaml])
     ## Note: Supports use of custom Helm templates
-    extraPaths: []
+    extraPaths:
+      []
       # - path: /*
       #   pathType: Prefix
       #   backend:
@@ -2405,7 +2433,8 @@ server:
     # -- Additional ingress rules
     # @default -- `[]` (See [values.yaml])
     ## Note: Supports use of custom Helm templates
-    extraRules: []
+    extraRules:
+      []
       # - http:
       #     paths:
       #     - path: /
@@ -2418,7 +2447,8 @@ server:
 
     # -- Additional TLS configuration
     # @default -- `[]` (See [values.yaml])
-    extraTls: []
+    extraTls:
+      []
       # - hosts:
       #   - argocd.example.com
       #   secretName: your-certificate-name
@@ -2444,7 +2474,8 @@ server:
       # -- Google [BackendConfig] resource, for use with the GKE Ingress Controller
       # @default -- `{}` (See [values.yaml])
       ## Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#configuring_ingress_features_through_frontendconfig_parameters
-      backendConfig: {}
+      backendConfig:
+        {}
         # iap:
         #  enabled: true
         #  oauthclientCredentials:
@@ -2453,7 +2484,8 @@ server:
       # -- Google [FrontendConfig] resource, for use with the GKE Ingress Controller
       # @default -- `{}` (See [values.yaml])
       ## Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#configuring_ingress_features_through_frontendconfig_parameters
-      frontendConfig: {}
+      frontendConfig:
+        {}
         # redirectToHttps:
         #   enabled: true
         #   responseCodeName: RESPONSE_CODE
@@ -2464,7 +2496,8 @@ server:
         ## Ref: https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
         create: true
         # -- Additional domains for ManagedCertificate resource
-        extraDomains: []
+        extraDomains:
+          []
           # - argocd.example.com
 
   # Dedicated gRPC ingress for ingress controllers that supports only single backend protocol per Ingress resource
@@ -2495,14 +2528,16 @@ server:
 
     # -- The list of additional hostnames to be covered by ingress record
     # @default -- `[]` (See [values.yaml])
-    extraHosts: []
+    extraHosts:
+      []
       # - name: grpc.argocd.example.com
       #   path: /
 
     # -- Additional ingress paths for dedicated [gRPC-ingress]
     # @default -- `[]` (See [values.yaml])
     ## Note: Supports use of custom Helm templates
-    extraPaths: []
+    extraPaths:
+      []
       # - path: /*
       #   pathType: Prefix
       #   backend:
@@ -2514,7 +2549,8 @@ server:
     # -- Additional ingress rules
     # @default -- `[]` (See [values.yaml])
     ## Note: Supports use of custom Helm templates
-    extraRules: []
+    extraRules:
+      []
       # - http:
       #     paths:
       #     - path: /
@@ -2527,7 +2563,8 @@ server:
 
     # -- Additional TLS configuration for dedicated [gRPC-ingress]
     # @default -- `[]` (See [values.yaml])
-    extraTls: []
+    extraTls:
+      []
       # - secretName: your-certificate-name
       #   hosts:
       #     - argocd.example.com
@@ -2581,7 +2618,8 @@ repoServer:
     # -- Average memory utilization percentage for the repo server [HPA]
     targetMemoryUtilizationPercentage: 60
     # -- Configures the scaling behavior of the target in both Up and Down directions.
-    behavior: {}
+    behavior:
+      {}
       # scaleDown:
       #  stabilizationWindowSeconds: 300
       #  policies:
@@ -2650,7 +2688,8 @@ repoServer:
   # -- Additional containers to be added to the repo server pod
   ## Ref: https://argo-cd.readthedocs.io/en/stable/user-guide/config-management-plugins/
   ## Note: Supports use of custom Helm templates
-  extraContainers: []
+  extraContainers:
+    []
     # - name: cmp-my-plugin
     #   command:
     #     - "/var/run/argocd/argocd-cmp-server"
@@ -2760,7 +2799,8 @@ repoServer:
     metrics: 8084
 
   # -- Host Network for Repo server pods
-  hostNetwork: false
+  hostNetwork:
+    false
 
     # -- [DNS configuration]
   dnsConfig: {}
@@ -2777,7 +2817,7 @@ repoServer:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Readiness and liveness probes for default backend
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -2824,13 +2864,15 @@ repoServer:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
 
   # -- Deployment strategy to be added to the repo server Deployment
-  deploymentStrategy: {}
+  deploymentStrategy:
+    {}
     # type: RollingUpdate
     # rollingUpdate:
     #   maxSurge: 25%
@@ -2851,11 +2893,11 @@ repoServer:
     # -- Labels to be added to argocd-repo-server-tls secret
     labels: {}
     # -- Certificate authority. Required for self-signed certificates.
-    ca: ''
+    ca: ""
     # -- Certificate private key
-    key: ''
+    key: ""
     # -- Certificate data. Must contain SANs of Repo service (ie: argocd-repo-server, argocd-repo-server.argo-cd.svc)
-    crt: ''
+    crt: ""
 
   ## Repo server service configuration
   service:
@@ -2899,7 +2941,8 @@ repoServer:
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
       metricRelabelings: []
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
 
       # -- Prometheus ServiceMonitor scheme
@@ -2998,13 +3041,15 @@ applicationSet:
   extraArgs: []
 
   # -- Environment variables to pass to the ApplicationSet controller
-  extraEnv: []
+  extraEnv:
+    []
     # - name: "MY_VAR"
     #   value: "value"
 
   # -- envFrom to pass to the ApplicationSet controller
   # @default -- `[]` (See [values.yaml])
-  extraEnvFrom: []
+  extraEnvFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -3062,7 +3107,8 @@ applicationSet:
       # -- Prometheus [MetricRelabelConfigs] to apply to samples before ingestion
       metricRelabelings: []
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
 
       # -- Prometheus ServiceMonitor scheme
@@ -3070,7 +3116,7 @@ applicationSet:
       # -- Prometheus ServiceMonitor tlsConfig
       tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
-      namespace: ""  # monitoring
+      namespace: "" # monitoring
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
       # -- Prometheus ServiceMonitor annotations
@@ -3114,7 +3160,8 @@ applicationSet:
   podLabels: {}
 
   # -- Resource limits and requests for the ApplicationSet controller pods.
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -3146,7 +3193,7 @@ applicationSet:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Probes for ApplicationSet controller (optional)
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -3197,13 +3244,15 @@ applicationSet:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
 
   # -- Deployment strategy to be added to the ApplicationSet controller Deployment
-  deploymentStrategy: {}
+  deploymentStrategy:
+    {}
     # type: RollingUpdate
     # rollingUpdate:
     #   maxSurge: 25%
@@ -3282,13 +3331,15 @@ applicationSet:
 
     # -- The list of additional hostnames to be covered by ingress record
     # @default -- `[]` (See [values.yaml])
-    extraHosts: []
+    extraHosts:
+      []
       # - name: argocd.example.com
       #   path: /
 
     # -- Additional ingress paths
     # @default -- `[]` (See [values.yaml])
-    extraPaths: []
+    extraPaths:
+      []
       # - path: /*
       #   pathType: Prefix
       #   backend:
@@ -3300,7 +3351,8 @@ applicationSet:
     # -- Additional ingress rules
     # @default -- `[]` (See [values.yaml])
     ## Note: Supports use of custom Helm templates
-    extraRules: []
+    extraRules:
+      []
       # - http:
       #    paths:
       #    - path: /api/webhook
@@ -3313,7 +3365,8 @@ applicationSet:
 
     # -- Additional ingress TLS configuration
     # @default -- `[]` (See [values.yaml])
-    extraTls: []
+    extraTls:
+      []
       # - secretName: argocd-applicationset-tls
       #   hosts:
       #     - argocd-applicationset.example.com
@@ -3383,7 +3436,8 @@ notifications:
 
   # -- envFrom to pass to the notifications controller
   # @default -- `[]` (See [values.yaml])
-  extraEnvFrom: []
+  extraEnvFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -3405,7 +3459,8 @@ notifications:
 
   # -- Define user-defined context
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/templates/#defining-user-defined-context
-  context: {}
+  context:
+    {}
     # region: east
     # environmentName: staging
 
@@ -3426,7 +3481,8 @@ notifications:
     # -- Generic key:value pairs to be inserted into the secret
     ## Can be used for templates, notification services etc. Some examples given below.
     ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/overview/
-    items: {}
+    items:
+      {}
       # slack-token:
       #   # For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/slack/
 
@@ -3437,7 +3493,7 @@ notifications:
 
       # email-username:
       # email-password:
-        # For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
+      # For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/email/
 
   metrics:
     # -- Enables prometheus metrics server
@@ -3459,7 +3515,8 @@ notifications:
       # -- Enable a prometheus ServiceMonitor
       enabled: false
       # -- Prometheus ServiceMonitor selector
-      selector: {}
+      selector:
+        {}
         # prometheus: kube-prometheus
       # -- Prometheus ServiceMonitor labels
       additionalLabels: {}
@@ -3482,7 +3539,8 @@ notifications:
   # -- Configures notification services such as slack, email or custom webhook
   # @default -- See [values.yaml]
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/overview/
-  notifiers: {}
+  notifiers:
+    {}
     # service.slack: |
     #   token: $slack-token
 
@@ -3496,7 +3554,8 @@ notifications:
   podLabels: {}
 
   # -- Resource limits and requests for the notifications controller
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -3524,7 +3583,7 @@ notifications:
       type: RuntimeDefault
     capabilities:
       drop:
-      - ALL
+        - ALL
 
   ## Probes for notifications controller Pods (optional)
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -3575,7 +3634,8 @@ notifications:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
@@ -3615,7 +3675,8 @@ notifications:
 
   # -- Contains centrally managed global application subscriptions
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/subscriptions/
-  subscriptions: []
+  subscriptions:
+    []
     # # subscription for on-sync-status-unknown trigger notifications
     # - recipients:
     #   - slack:test2
@@ -3631,7 +3692,8 @@ notifications:
 
   # -- The notification template is used to generate the notification content
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/templates/
-  templates: {}
+  templates:
+    {}
     # template.app-deployed: |
     #   email:
     #     subject: New version of an application {{.app.metadata.name}} is up and running.
@@ -3848,7 +3910,8 @@ notifications:
 
   # -- The trigger defines the condition when the notification should be sent
   ## For more information: https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/triggers/
-  triggers: {}
+  triggers:
+    {}
     # trigger.on-deployed: |
     #   - description: Application is synced and healthy. Triggered once per commit.
     #     oncePer: app.status.sync.revision
@@ -3912,13 +3975,15 @@ commitServer:
   extraArgs: []
 
   # -- Environment variables to pass to the commit server
-  extraEnv: []
+  extraEnv:
+    []
     # - name: "MY_VAR"
     #   value: "value"
 
   # -- envFrom to pass to the commit server
   # @default -- `[]` (See [values.yaml])
-  extraEnvFrom: []
+  extraEnvFrom:
+    []
     # - configMapRef:
     #     name: config-map-name
     # - secretRef:
@@ -3979,7 +4044,8 @@ commitServer:
   podLabels: {}
 
   # -- Resource limits and requests for the commit server pods.
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -4000,7 +4066,7 @@ commitServer:
     allowPrivilegeEscalation: false
     capabilities:
       drop:
-      - ALL
+        - ALL
     seccompProfile:
       type: RuntimeDefault
 
@@ -4049,13 +4115,15 @@ commitServer:
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
+  topologySpreadConstraints:
+    []
     # - maxSkew: 1
     #   topologyKey: topology.kubernetes.io/zone
     #   whenUnsatisfiable: DoNotSchedule
 
   # -- Deployment strategy to be added to the commit server Deployment
-  deploymentStrategy: {}
+  deploymentStrategy:
+    {}
     # type: RollingUpdate
     # rollingUpdate:
     #   maxSurge: 25%

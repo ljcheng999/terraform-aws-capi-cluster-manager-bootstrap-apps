@@ -13,7 +13,7 @@ data "aws_eks_cluster_auth" "this" {
 
 data "aws_iam_openid_connect_provider" "this" {
   count = local.create ? 1 : 0
-  url = data.aws_eks_cluster.this[0].identity[0].oidc[0].issuer
+  url   = data.aws_eks_cluster.this[0].identity[0].oidc[0].issuer
 }
 
 
@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "eso_assume_role" {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
     principals {
-      type        = "Federated"
+      type = "Federated"
       identifiers = [
         data.aws_iam_openid_connect_provider.this[0].arn
       ]
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "velero_assume_role" {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
     principals {
-      type        = "Federated"
+      type = "Federated"
       identifiers = [
         data.aws_iam_openid_connect_provider.this[0].arn
       ]
@@ -64,12 +64,18 @@ data "aws_iam_policy_document" "velero_assume_role" {
 #   }
 # }
 
-# # This data will contain all of your subnets within the given VPC
-# data "aws_subnets" "all" {
-#   filter {
-#     name   = "vpc-id"
-#     values = [data.aws_route_table.example.vpc_id]
-#   }
+data "aws_subnets" "public_subnets" {
+  count = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing")}" == "internet-facing" ? 1 : 0
+  filter {
+    name   = "tag:Name"
+    values = ["${var.vpc_public_subnets_name_prefix}*"]
+  }
+}
+
+
+
+# output "public_aws_subnets" {
+#   value = data.aws_subnets.public_subnets
 # }
 
 # # This data will contain all subnets associated with the given route table

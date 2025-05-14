@@ -59,7 +59,8 @@ securityContext:
 # Time period for the controller pod to do a graceful shutdown
 terminationGracePeriodSeconds: 10
 
-resources: {}
+resources:
+  {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -78,6 +79,9 @@ priorityClassName: system-cluster-critical
 nodeSelector: {}
 
 tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    value: "true"
+    effect: "NoSchedule"
   - key: "node.kubesources.com/role"
     value: "system"
     effect: "NoSchedule"
@@ -96,7 +100,8 @@ configureDefaultAffinity: true
 # more details here: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
 topologySpreadConstraints: []
 
-updateStrategy: {}
+updateStrategy:
+  {}
   # type: RollingUpdate
   # rollingUpdate:
   #   maxSurge: 1
@@ -140,7 +145,8 @@ ingressClassParams:
   create: true
   # The name of ingressClassParams resource will be referred in ingressClass
   name:
-  spec: {}
+  spec:
+    {}
     # Due to dependency issue, the validation webhook ignores this particular ingressClassParams resource.
     # We recommend creating ingressClassParams resources separately after installing this chart and the
     # controller is functional.
@@ -336,7 +342,8 @@ extraVolumes:
   #         path: token
 
 # defaultTags are the tags to apply to all AWS resources managed by this controller
-defaultTags: {}
+defaultTags:
+  {}
   # default_tag1: value1
   # default_tag2: value2
 
@@ -434,12 +441,13 @@ serviceMutatorWebhookConfig:
     #   operator: <operator>
     #   values:
     #   - <value>
-    matchLabels: {}
+    matchLabels:
+      {}
       # key: value
   # which operations trigger the webhook
   operations:
-  - CREATE
-    # - UPDATE
+    - CREATE
+      # - UPDATE
 
 # podMutatorWebhookConfig contains configurations specific to the service mutator webhook
 podMutatorWebhookConfig:
@@ -451,6 +459,5 @@ serviceTargetENISGTags:
 
 # Specifies the class of load balancer to use for services. This affects how services are provisioned if type LoadBalancer is used (default service.k8s.aws/nlb)
 loadBalancerClass:
-
 # creator will disable helm default labels, so you can only add yours
 # creator: "me"
