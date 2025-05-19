@@ -57,12 +57,20 @@ data "aws_iam_policy_document" "velero_assume_role" {
 
 
 
-# data "aws_route_table" "example" {
-#   vpc_id = "vpc-123456" # Replace with your VPC ID
-#   tags = {
-#     Name = "routetable-name"
+# data "kubernetes_service" "argocd_ingress_nginx" {
+#   count = local.create && local.create_argocd_ingress_nginx_controller ? 1 : 0
+#   metadata {
+#     name      = lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_name, "${var.cluster_name}-argocd-alb-ingress")
+#     namespace = lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_namespace, "kube-system")
 #   }
 # }
+
+# output "k8s_service_ingress" {
+#   description = "External DN name of load balancer"
+#   value       = data.kubernetes_service.argocd_ingress_nginx[0].status.load_balancer.ingress.0.hostname
+#   # value       = data.kubernetes_service.argocd_ingress_nginx[0].status.0.load_balancer.0.ingress.0.hostname
+# }
+
 
 data "aws_subnets" "public_subnets" {
   count = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing")}" == "internet-facing" ? 1 : 0

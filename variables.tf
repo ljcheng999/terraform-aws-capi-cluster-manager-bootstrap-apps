@@ -35,18 +35,22 @@ variable "route53_zone_id" {
 variable "default_helm_repo_parameter" {
   type = map(any)
   default = {
-    helm_repo_chart                       = "helm_repo_chart"
-    helm_repo_name                        = "helm_repo_name_key"
-    helm_repo_namespace                   = "helm_repo_namespace"
-    helm_repo_url                         = "helm_repo_url"
-    helm_repo_version                     = "helm_repo_version"
-    helm_repo_timeout                     = 4000
-    helm_repo_crd                         = null
-    helm_repo_ingressclassname            = "helm_repo_ingressclassname"
-    helm_repo_create_argocd_cert          = "helm_repo_create_argocd_cert"
-    helm_repo_create_wildcard_argocd_cert = "create_wildcard_argocd_cert"
-    helm_repo_custom_argocd_subdomain     = "helm_repo_custom_argocd_subdomain"
-    helm_repo_argocd_endpoint             = "helm_repo_argocd_endpoint"
+    helm_repo_chart                        = "helm_repo_chart"
+    helm_repo_name                         = "helm_repo_name_key"
+    helm_repo_namespace                    = "helm_repo_namespace"
+    helm_repo_url                          = "helm_repo_url"
+    helm_repo_version                      = "helm_repo_version"
+    helm_repo_timeout                      = 4000
+    helm_repo_crd                          = null
+    helm_repo_ingressclassname             = "helm_repo_ingressclassname"
+    helm_repo_create_argocd_cert           = "helm_repo_create_argocd_cert"
+    helm_repo_create_wildcard_argocd_cert  = "create_wildcard_argocd_cert"
+    helm_repo_custom_argocd_subdomain      = "helm_repo_custom_argocd_subdomain"
+    helm_repo_argocd_endpoint              = "helm_repo_argocd_endpoint"
+    argocd_ingress_nginx_helm_repo_chart   = "argocd_ingress_nginx_helm_repo_chart"
+    argocd_ingress_nginx_helm_repo_name    = "argocd_ingress_nginx_helm_repo_name"
+    argocd_ingress_nginx_helm_repo_url     = "argocd_ingress_nginx_helm_repo_url"
+    argocd_ingress_nginx_helm_repo_version = "argocd_ingress_nginx_helm_repo_version"
   }
 }
 
@@ -69,6 +73,10 @@ variable "create_argocd_controller" {
   type    = bool
   default = false
 }
+variable "create_argocd_ingress_nginx_controller" {
+  type    = bool
+  default = false
+}
 
 variable "create_argocd_namespace" {
   type    = bool
@@ -76,6 +84,10 @@ variable "create_argocd_namespace" {
 }
 
 variable "helm_release_argocd_controller_parameter" {
+  type    = map(any)
+  default = {}
+}
+variable "helm_release_argocd_ingress_nginx_parameter" {
   type    = map(any)
   default = {}
 }
@@ -87,6 +99,11 @@ variable "argocd_subdomain" {
 variable "create_argocd_alb_ingress" {
   type    = bool
   default = false
+}
+
+variable "argocd_admin_password_length" {
+  type    = number
+  default = 24
 }
 
 variable "default_argocd_alb_ingress_parameter" {
@@ -103,6 +120,12 @@ variable "default_argocd_alb_ingress_parameter" {
     aws_argocd_alb_ingress_scheme                   = "aws_argocd_alb_ingress_scheme"
     aws_argocd_alb_ingress_success_codes            = "aws_argocd_alb_ingress_success_codes"
     aws_argocd_alb_ingress_target_type              = "aws_argocd_alb_ingress_target_type"
+    argocd_ingress_nginx_create                     = "argocd_ingress_nginx_create"
+    argocd_ingress_nginx_helm_repo_chart            = "argocd_ingress_nginx_helm_repo_chart"
+    argocd_ingress_nginx_helm_repo_name             = "argocd_ingress_nginx_helm_repo_name"
+    argocd_ingress_nginx_helm_repo_namespace        = "argocd_ingress_nginx_helm_repo_namespace"
+    argocd_ingress_nginx_helm_repo_url              = "argocd_ingress_nginx_helm_repo_url"
+    argocd_ingress_nginx_helm_repo_version          = "argocd_ingress_nginx_helm_repo_version"
   }
 }
 
@@ -116,52 +139,49 @@ variable "default_argocd_alb_ingress_parameter" {
 
 
 
-variable "custom_argocd_subdomain" {
-  type    = string
-  default = "argocd"
-}
-variable "create_argocd_cert" {
-  type    = bool
-  default = false
-}
-variable "create_wildcard_argocd_cert" {
-  type    = bool
-  default = true
-}
-variable "create_kube_dashboard_cert" {
-  type    = bool
-  default = false
-}
-variable "argocd_waf_arn" {
-  type    = string
-  default = ""
-}
-variable "public_subnet_ids" {
-  type    = list(any)
-  default = []
-}
-variable "final_acm_domain" {
-  type    = string
-  default = ""
-}
-variable "final_kube_dashboard_acm_domain" {
-  type    = string
-  default = ""
-}
+# variable "custom_argocd_subdomain" {
+#   type    = string
+#   default = "argocd"
+# }
+# variable "create_argocd_cert" {
+#   type    = bool
+#   default = false
+# }
+# variable "create_wildcard_argocd_cert" {
+#   type    = bool
+#   default = true
+# }
+# variable "create_kube_dashboard_cert" {
+#   type    = bool
+#   default = false
+# }
+# variable "argocd_waf_arn" {
+#   type    = string
+#   default = ""
+# }
+# variable "public_subnet_ids" {
+#   type    = list(any)
+#   default = []
+# }
+# variable "final_acm_domain" {
+#   type    = string
+#   default = ""
+# }
+# variable "final_kube_dashboard_acm_domain" {
+#   type    = string
+#   default = ""
+# }
 
-variable "argocd_route53_validation_method" {
-  type    = string
-  default = "DNS"
-}
-variable "argocd_route53_validation_method_allow_overwrite" {
-  type    = bool
-  default = true
-}
+# variable "argocd_route53_validation_method" {
+#   type    = string
+#   default = "DNS"
+# }
+# variable "argocd_route53_validation_method_allow_overwrite" {
+#   type    = bool
+#   default = true
+# }
 
-variable "argocd_admin_password_length" {
-  type    = number
-  default = 24
-}
+
 
 
 ################################################################################

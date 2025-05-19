@@ -53,7 +53,31 @@ controller:
     https: 443
   # -- Global configuration passed to the ConfigMap consumed by the controller. Values may contain Helm templates.
   # Ref.: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
-  config: {}
+  config:
+    "http-snippet": |
+      proxy_cache_path /tmp/cache
+      levels=1:2
+      keys_zone=app_ache:100m
+      max_size=1g
+      inactive=60m
+      use_temp_path=off;
+
+      server {
+        listen 18080;
+        location /nginx_status {
+        stub_status on;
+        access_log off;
+        allow all;
+        }
+      }
+    "ssl-redirect": "false"
+    "proxy-buffer-size": "128k"
+    "large-client-header-buffers": "4 256k"
+    "client-header-buffer-size": "128k"
+    "use-forwarded-headers": "true"
+    "log-format": api_request_log escape-none '[$time_local] $request \n$request_body';
+    "log-format-upstream": '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_length $request_time [$proxy_upstream_name] [$proxy_alternative_upstream_name] $upstream_addr $upstream_response_length $upstream_response_time $upstream_status $req_id'
+    "log-format-escape-json": "true"
   # -- Annotations to be added to the controller config configuration configmap.
   configAnnotations: {}
   # -- Will add custom headers before sending traffic to backends according to https://github.com/kubernetes/ingress-nginx/tree/main/docs/examples/customization/custom-headers
@@ -124,7 +148,7 @@ controller:
   # We do not support namespaced IngressClasses, yet, so a ClusterRole and a ClusterRoleBinding is required.
   ingressClassResource:
     # -- Name of the IngressClass
-    name: nginx
+    name: argocd
     # -- Create the IngressClass or not
     enabled: true
     # -- If true, Ingresses without `ingressClassName` get assigned to this IngressClass on creation.
@@ -136,7 +160,7 @@ controller:
     # -- Controller of the IngressClass. An Ingress Controller looks for IngressClasses it should reconcile by this value.
     # This value is also being set as the `--controller-class` argument of this Ingress Controller.
     # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
-    controllerValue: k8s.io/ingress-nginx
+    controllerValue: k8s.io/argocd-ingress-nginx
     # -- Aliases of this IngressClass. Creates copies with identical settings but the respective alias as name.
     # Useful for development environments with only one Ingress Controller but production-like Ingress resources.
     # `default` gets enabled on the original IngressClass only.
@@ -154,7 +178,7 @@ controller:
     #   name: external-lb
   # -- For backwards compatibility with ingress.class annotation, use ingressClass.
   # Algorithm is as follows, first ingressClassName is considered, if not present, controller looks for ingress.class annotation
-  ingressClass: nginx
+  ingressClass: argocd
   # -- Labels to add to the pod container metadata
   podLabels: {}
   #  key: value
@@ -249,7 +273,13 @@ controller:
   # -- Node tolerations for server scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  tolerations: []
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      value: "true"
+      effect: "NoSchedule"
+    - key: "node.kubesources.com/role"
+      value: "system"
+      effect: "NoSchedule"
   #  - key: "key"
   #    operator: "Equal|Exists"
   #    value: "value"
@@ -492,7 +522,7 @@ controller:
     labels: {}
     # -- Type of the external controller service.
     # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-    type: LoadBalancer
+    type: NodePort
     # -- Pre-defined cluster internal IP address of the external controller service. Take care of collisions with existing services.
     # This value is immutable. Set once, it can not be changed without deleting and re-creating the service.
     # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#choosing-your-own-ip-address
@@ -809,7 +839,13 @@ controller:
         enabled: false
       nodeSelector:
         kubernetes.io/os: linux
-      tolerations: []
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          value: "true"
+          effect: "NoSchedule"
+        - key: "node.kubesources.com/role"
+          value: "system"
+          effect: "NoSchedule"
       # -- Labels to be added to patch job resources
       labels: {}
       # -- Security context for secret creation & webhook patch pods
@@ -1001,7 +1037,13 @@ defaultBackend:
   # -- Node tolerations for server scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
-  tolerations: []
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      value: "true"
+      effect: "NoSchedule"
+    - key: "node.kubesources.com/role"
+      value: "system"
+      effect: "NoSchedule"
   #  - key: "key"
   #    operator: "Equal|Exists"
   #    value: "value"

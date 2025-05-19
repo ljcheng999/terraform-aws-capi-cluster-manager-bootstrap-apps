@@ -1,9 +1,9 @@
 
 
 locals {
-  create            = var.create
-  cluster_name      = var.cluster_name
-  public_subnet_ids = var.public_subnet_ids
+  create       = var.create
+  cluster_name = var.cluster_name
+  # public_subnet_ids = var.public_subnet_ids
 
   ### AWS ELB Controller
   create_aws_elb_controller                 = var.create_aws_elb_controller
@@ -30,12 +30,10 @@ locals {
   route53_zone_id = var.route53_zone_id
 
   ### ArgoCD
-  create_argocd_controller                 = var.create_argocd_controller
-  helm_release_argocd_controller_parameter = var.helm_release_argocd_controller_parameter
-  argocd_hostname                          = "${lookup(local.helm_release_argocd_controller_parameter, var.default_helm_repo_parameter.helm_repo_custom_argocd_subdomain, "ljcheng")}.${var.argocd_subdomain}.${var.custom_domain}"
-
-
-
-
+  create_argocd_controller                    = var.create_argocd_controller
+  argocd_hostname                             = "${lookup(local.helm_release_argocd_controller_parameter, var.default_helm_repo_parameter.helm_repo_custom_argocd_subdomain, "ljcheng")}.${var.argocd_subdomain}.${var.custom_domain}"
+  helm_release_argocd_controller_parameter    = var.helm_release_argocd_controller_parameter
+  create_argocd_ingress_nginx_controller      = var.create_argocd_ingress_nginx_controller
+  helm_release_argocd_ingress_nginx_parameter = var.helm_release_argocd_ingress_nginx_parameter
 
 }

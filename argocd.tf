@@ -34,10 +34,53 @@ resource "helm_release" "argocd" {
 
   depends_on = [
     helm_release.aws_elb_controller,
-    kubectl_manifest.aws_argocd_alb_ingress,
+    kubernetes_ingress_v1.aws_argocd_alb_ingress,
+    # kubectl_manifest.aws_argocd_alb_ingress,
     kubectl_manifest.aws_alb_ingressclass,
   ]
 }
+
+resource "helm_release" "argocd_nginx_ingress" {
+  count            = local.create && local.create_argocd_ingress_nginx_controller ? 1 : 0
+  create_namespace = var.create_argocd_namespace
+
+  chart      = lookup(local.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_chart, "ingress-nginx")
+  name       = lookup(local.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_name, "${var.cluster_name}-argocd-ingress-nginx")
+  namespace  = lookup(local.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "kube-system")
+  repository = lookup(local.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_url, "https://kubernetes.github.io/ingress-nginx")
+  version    = lookup(local.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_version, "4.12.2")
+  timeout    = lookup(local.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_timeout, 4000)
+
+  wait          = true
+  wait_for_jobs = true
+  max_history   = 3
+
+  values = [
+    templatefile("${path.module}/templates/helm/argocd-nginx-ingress-values.yaml", {
+      cluster_name = "${var.cluster_name}"
+    })
+  ]
+
+  depends_on = [
+    helm_release.aws_elb_controller,
+    kubernetes_ingress_v1.aws_argocd_alb_ingress,
+    kubectl_manifest.aws_alb_ingressclass,
+  ]
+}
+
+output "argocd_nginx_ingress_url" {
+  value = helm_release.argocd_nginx_ingress
+}
+
+# resource "aws_route53_record" "cname_record" {
+#   count   = local.create && local.create_argocd_ingress_nginx_controller ? 1 : 0
+#   zone_id = local.route53_zone_id
+#   name    = local.argocd_hostname
+#   type    = "CNAME"
+#   ttl     = 60
+#   records = [data.kubernetes_service.argocd_ingress_nginx[0].status.0.load_balancer.0.ingress.0.hostname]
+#   # records = ["${data.kubernetes_service.argocd_ingress_nginx.0.status.0.load_balancer.0.ingress.0.hostname}"]
+# }
 
 ###############################################
 #     ArgoCD UI secrets
@@ -137,54 +180,145 @@ module "argo_alb_sg" {
   )
 }
 
-# alb.ingress.kubernetes.io/certificate-arn: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_certificate_arn, "")}"
-resource "kubectl_manifest" "aws_argocd_alb_ingress" {
-  count     = local.create && local.create_aws_elb_controller && "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_create, false)}" ? 1 : 0
-  yaml_body = <<-EOF
-    apiVersion: networking.k8s.io/v1
-    kind: Ingress
-    metadata:
-      annotations:
-        alb.ingress.kubernetes.io/actions.ssl-redirect: {"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port":"443", "StatusCode": "HTTP_301"}}
-        alb.ingress.kubernetes.io/certificate-arn: "${module.argocd_acm.acm_certificate_arn}"
-        alb.ingress.kubernetes.io/healthcheck-path: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_healthcheck_path, "/healthz")}"
-        alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}, {"HTTPS":443}]'
-        alb.ingress.kubernetes.io/load-balancer-attributes: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_load_balancer_attributes, "idle_timeout.timeout_seconds=600")}"
-        alb.ingress.kubernetes.io/manage-backend-security-group-rules: 'true'
-        alb.ingress.kubernetes.io/scheme: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing")}"
-        alb.ingress.kubernetes.io/security-groups: "${module.argo_alb_sg.security_group_id}"
-        alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
-        alb.ingress.kubernetes.io/subnets: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing") == "internet-facing" ? "${join(",", data.aws_subnets.public_subnets[0].ids)}" : ""}
-        alb.ingress.kubernetes.io/success-codes: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_success_codes, "200")}"
-        alb.ingress.kubernetes.io/target-type: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_target_type, "instance")}"
-        alb.ingress.kubernetes.io/wafv2-acl-arn: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_waf_arn, "alb")}
-      name: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_name, "${var.cluster_name}-argocd-alb-ingress")}
-      namespace: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_namespace, "kube-system")}
-    spec:
-      ingressClassName: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_classname, "alb")}
-      rules:
-      - http:
-          paths:
-            - backend:
-                service:
-                  name: ssl-redirect
-                  port:
-                    name: use-annotation
-              path: /*
-              pathType: ImplementationSpecific
-            - backend:
-                service:
-                  name: ingress-nginx-fw-controller
-                  port:
-                    number: 80
-              path: /*
-              pathType: ImplementationSpecific
-    EOF
+resource "kubernetes_ingress_v1" "aws_argocd_alb_ingress" {
+  metadata {
+    name      = lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_name, "${var.cluster_name}-argocd-alb-ingress")
+    namespace = lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_namespace, "kube-system")
+    annotations = {
+      "alb.ingress.kubernetes.io/actions.ssl-redirect"                = <<JSON
+      {
+        "Type": "redirect",
+        "RedirectConfig": {
+          "Protocol": "HTTPS",
+          "Port": "443",
+          "StatusCode": "HTTP_301"
+        }
+      }
+      JSON
+      "alb.ingress.kubernetes.io/certificate-arn"                     = "${module.argocd_acm.acm_certificate_arn}"
+      "alb.ingress.kubernetes.io/healthcheck-path"                    = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_healthcheck_path, "/healthz")}"
+      "alb.ingress.kubernetes.io/listen-ports"                        = <<JSON
+      [
+        {"HTTP": 80},
+        {"HTTPS": 443}
+      ]
+      JSON
+      "alb.ingress.kubernetes.io/load-balancer-attributes"            = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_load_balancer_attributes, "idle_timeout.timeout_seconds=600")}"
+      "alb.ingress.kubernetes.io/manage-backend-security-group-rules" = true
+      "alb.ingress.kubernetes.io/scheme"                              = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing")}"
+      "alb.ingress.kubernetes.io/security-groups"                     = "${module.argo_alb_sg.security_group_id}"
+      "alb.ingress.kubernetes.io/ssl-policy"                          = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+      "alb.ingress.kubernetes.io/subnets"                             = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing") == "internet-facing" ? "${join(",", data.aws_subnets.public_subnets[0].ids)}" : ""}"
+      "alb.ingress.kubernetes.io/success-codes"                       = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_success_codes, "200")}"
+      "alb.ingress.kubernetes.io/target-type"                         = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_target_type, "instance")}"
+      "alb.ingress.kubernetes.io/wafv2-acl-arn"                       = "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_waf_arn, "")}"
+    }
+  }
 
+  spec {
+    rule {
+      http {
+        path {
+          backend {
+            service {
+              name = "ssl-redirect"
+              port {
+                name = "use-annotation"
+              }
+            }
+          }
+          path = "/*"
+        }
+        path {
+          backend {
+            service {
+              name = "${var.cluster_name}-argocd-ingress-nginx-controller"
+              port {
+                number = 80
+              }
+            }
+          }
+          path = "/*"
+        }
+      }
+    }
+  }
+
+  wait_for_load_balancer = true
   depends_on = [
     helm_release.aws_elb_controller
   ]
 }
+
+# resource "kubectl_manifest" "aws_argocd_alb_ingress" {
+#   count     = local.create && local.create_aws_elb_controller && "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_create, false)}" ? 1 : 0
+#   yaml_body = <<-EOF
+#     apiVersion: networking.k8s.io/v1
+#     kind: Ingress
+#     metadata:
+#       annotations:
+#         alb.ingress.kubernetes.io/actions.ssl-redirect: <<JSON
+#         {
+#           "Type": "redirect",
+#           "RedirectConfig": {
+#             "Protocol": "HTTPS",
+#             "Port": "443",
+#             "StatusCode": "HTTP_301"
+#           }
+#         }
+#         JSON
+#         alb.ingress.kubernetes.io/certificate-arn: "${module.argocd_acm.acm_certificate_arn}"
+#         alb.ingress.kubernetes.io/healthcheck-path: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_healthcheck_path, "/healthz")}"
+#         alb.ingress.kubernetes.io/listen-ports: <<JSON
+#         [
+#           {"HTTP": 80},
+#           {"HTTPS": 443}
+#         ]
+#         JSON
+#         alb.ingress.kubernetes.io/load-balancer-attributes: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_load_balancer_attributes, "idle_timeout.timeout_seconds=600")}"
+#         alb.ingress.kubernetes.io/manage-backend-security-group-rules: 'true'
+#         alb.ingress.kubernetes.io/scheme: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing")}"
+#         alb.ingress.kubernetes.io/security-groups: "${module.argo_alb_sg.security_group_id}"
+#         alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+#         alb.ingress.kubernetes.io/subnets: ""
+#         alb.ingress.kubernetes.io/success-codes: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_success_codes, "200")}"
+#         alb.ingress.kubernetes.io/target-type: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_target_type, "instance")}"
+#         alb.ingress.kubernetes.io/wafv2-acl-arn: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_waf_arn, "")}
+#       name: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_name, "${var.cluster_name}-argocd-alb-ingress")}
+#       namespace: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_namespace, "kube-system")}
+#     spec:
+#       ingressClassName: ${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_classname, "alb")}
+#       rules:
+#       - http:
+#           paths:
+#             - backend:
+#                 service:
+#                   name: ssl-redirect
+#                   port:
+#                     name: use-annotation
+#               path: /*
+#               pathType: ImplementationSpecific
+#             - backend:
+#                 service:
+#                   name: ingress-nginx-fw-controller
+#                   port:
+#                     number: 80
+#               path: /*
+#               pathType: ImplementationSpecific
+#     EOF
+
+#   depends_on = [
+#     helm_release.aws_elb_controller
+#   ]
+# }
+
+
+# alb.ingress.kubernetes.io/actions.ssl-redirect: ${jsondecode("{ \"Type\" : \"redirect\", \"RedirectConfig\" : { \"Protocol\" : \"HTTPS\", \"Port\" : \"443\", \"StatusCode\" : \"HTTP_301\" } }\")}
+
+# alb.ingress.kubernetes.io/actions.ssl-redirect: {"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port":"443", "StatusCode": "HTTP_301" }}
+# alb.ingress.kubernetes.io/subnets: "${lookup(local.helm_release_argocd_controller_parameter, var.default_argocd_alb_ingress_parameter.aws_argocd_alb_ingress_scheme, "internet-facing") == "internet-facing" ? "${join(",", data.aws_subnets.public_subnets[0].ids)}" : ""}
+
+
 
 # module "acm" {
 #   source  = "terraform-aws-modules/acm/aws"
