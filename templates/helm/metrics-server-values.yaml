@@ -1,0 +1,13 @@
+# See https://github.com/kubernetes-sigs/metrics-server#scaling
+resources:
+  requests:
+    cpu: 100m
+    memory: 200Mi
+  # limits:
+  #   cpu:
+  #   memory:
+
+tolerations:
+  - key: ${toleration_key}
+    value: ${toleration_value}
+    effect: "NoSchedule"
