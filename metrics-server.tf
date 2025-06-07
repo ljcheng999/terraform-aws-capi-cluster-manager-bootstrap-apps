@@ -18,4 +18,8 @@ resource "helm_release" "metrics_server" {
     toleration_key   = "node.${var.custom_domain}/role",
     toleration_value = "system",
   })]
+
+  depends_on = [
+    helm_release.aws_elb_controller
+  ]
 }
