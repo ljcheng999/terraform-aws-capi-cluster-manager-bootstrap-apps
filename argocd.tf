@@ -37,9 +37,6 @@ resource "helm_release" "argocd" {
   depends_on = [
     helm_release.aws_elb_controller,
     helm_release.argocd_nginx_ingress,
-    # kubernetes_ingress_v1.aws_argocd_alb_ingress,
-    # kubectl_manifest.aws_argocd_alb_ingress,
-    # kubectl_manifest.aws_alb_ingressclass,
   ]
 }
 

@@ -15,8 +15,6 @@ data "aws_eks_cluster_auth" "this" {
   ]
 }
 
-
-
 # ###############################################
 # #     AWS base components
 # ###############################################
@@ -27,7 +25,6 @@ data "aws_vpc" "selected" {
     values = ["${var.vpc_prefix}*"]
   }
 }
-
 
 data "aws_subnets" "public_subnets" {
   count = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_scheme, "internet-facing")}" == "internet-facing" ? 1 : 0
@@ -44,7 +41,6 @@ data "aws_route53_zone" "route53_zone" {
 # ###############################################
 # #     External Secrets components
 # ###############################################
-
 data "aws_iam_openid_connect_provider" "this" {
   count = var.create ? 1 : 0
   url   = data.aws_eks_cluster.this[0].identity[0].oidc[0].issuer
@@ -87,6 +83,11 @@ data "aws_iam_policy_document" "velero_assume_role" {
       test     = "StringEquals"
       variable = "${replace(data.aws_iam_openid_connect_provider.this[0].url, "https://", "")}:sub"
       values   = ["system:serviceaccount:${lookup(var.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")}:${var.helm_release_velero_serviceaccount_name}"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.this[0].url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
     }
   }
 }
