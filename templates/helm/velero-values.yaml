@@ -12,6 +12,14 @@ kubectl:
     # digest:
     # kubectl image tag. If used, it will take precedence over the cluster Kubernetes version.
     # tag: 1.16.15
+
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.10.0
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
 ##
 ## Parameters for the `default` BackupStorageLocation and VolumeSnapshotLocation,
 ## and additional server settings.
@@ -22,13 +30,14 @@ configuration:
   backupStorageLocation:
     # name is the name of the backup storage location where backups should be stored. If a name is not provided,
     # a backup storage location will be created with the name "default". Optional.
-    - name: ${cloud_bucket_folder_name}
+    - name: ${cloud_bucket}
       # provider is the name for the backup storage location provider.
       provider: ${cloud_provider}
       # bucket is the name of the bucket to store backups in. Required.
       bucket: ${cloud_bucket}
       # prefix is the directory under which all Velero data should be stored within the bucket. Optional.
       prefix: ${cloud_bucket_prefix}
+      # default: "true"
       # Additional provider-specific configuration. See link above
       # for details of required/optional fields for your provider.
       config:
@@ -55,7 +64,11 @@ serviceAccount:
     create: true
     name: ${cloud_irsa_name}
     annotations:
-      eks.amazonaws.com/role-arn: ${cloud_irsa_arn}
+      eks.amazonaws.com/role-arn: "${cloud_irsa_arn}"
+
+# If irsa is being used, we should set this false
+credentials:
+  useSecret: false
 
 # Whether to deploy the node-agent daemonset.
 deployNodeAgent: true
@@ -73,6 +86,7 @@ schedules:
     useOwnerReferencesInBackup: false
     template:
       ttl: 168h
+      storageLocation: ${cloud_bucket}
       includeClusterResources: true
       excludedNamespaces:
         - metrics-server
@@ -80,7 +94,6 @@ schedules:
         - kube-node-lease
         - kube-public
         - kube-system
-
           # - aws-load-balancer
           # - cert-manager
           # - datadog
@@ -101,6 +114,7 @@ schedules:
     useOwnerReferencesInBackup: false
     template:
       ttl: 168h
+      storageLocation: ${cloud_bucket}
       includeClusterResources: true
       excludedNamespaces:
         - metrics-server
@@ -128,6 +142,7 @@ schedules:
     useOwnerReferencesInBackup: false
     template:
       ttl: 2190h
+      storageLocation: ${cloud_bucket}
       includeClusterResources: true
       excludedNamespaces:
         - metrics-server

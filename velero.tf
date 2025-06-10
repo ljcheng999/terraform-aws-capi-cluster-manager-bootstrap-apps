@@ -20,7 +20,7 @@ resource "helm_release" "velero" {
     cloud_region             = "${lookup(var.helm_release_velero_parameter, "cloud_region", "us-east-1")}",
     cloud_bucket_prefix      = "${var.cluster_name}",
     cloud_irsa_name          = "${var.helm_release_velero_serviceaccount_name}",
-    cloud_irsa_arn           = "${aws_iam_role.velero_role[0].arn}",
+    cloud_irsa_arn           = "${aws_iam_role.velero_role[0].arn}"
     toleration_key           = "node.${var.custom_domain}/role",
     toleration_value         = "system",
   })]
@@ -35,7 +35,45 @@ resource "aws_iam_policy" "amazon_eks_velero_policy" {
   count       = var.create && var.create_velero_controller ? 1 : 0
   name        = "${var.cluster_name}-eks-velero-operator-role-policy"
   description = "Policy for ${var.cluster_name} CAPI Cluster Velero policy"
-  policy      = file("${path.module}/templates/aws/velero-policy.json")
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ec2:DescribeVolumes",
+          "ec2:DescribeSnapshots",
+          "ec2:CreateTags",
+          "ec2:CreateVolume",
+          "ec2:CreateSnapshot",
+          "ec2:DeleteSnapshot"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:PutObject",
+          "s3:AbortMultipartUpload",
+          "s3:ListMultipartUploadParts"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:s3:::${lookup(var.helm_release_velero_parameter, "cloud_bucket", "velero-ljcheng-cluster-backups")}/*"
+        ]
+      },
+      {
+        Action = [
+          "s3:ListBucket"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:s3:::${lookup(var.helm_release_velero_parameter, "cloud_bucket", "velero-ljcheng-cluster-backups")}"
+        ]
+      },
+    ]
+  })
 
   tags = merge(
     {
@@ -55,19 +93,4 @@ resource "aws_iam_role" "velero_role" {
   count              = var.create && var.create_velero_controller ? 1 : 0
   name               = "${var.cluster_name}-velero-operator-role"
   assume_role_policy = data.aws_iam_policy_document.velero_assume_role[0].json
-}
-
-resource "kubernetes_service_account" "velero_operator_sa" {
-  count = var.create && var.create_velero_controller ? 1 : 0
-  metadata {
-    name      = var.helm_release_velero_serviceaccount_name
-    namespace = lookup(var.helm_release_velero_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "velero")
-    annotations = {
-      "eks.amazonaws.com/role-arn" = aws_iam_role.velero_role[0].arn
-    }
-  }
-
-  depends_on = [
-    helm_release.velero,
-  ]
 }
