@@ -206,6 +206,10 @@ variable "argocd_elb_waf_acl_log_destination_configs_arn" {
   default = ""
 }
 
+variable "argocd_projects_roles" {
+  default = []
+}
+
 variable "default_argocd_alb_ingress_parameter" {
   type = map(any)
   default = {

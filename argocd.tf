@@ -77,7 +77,6 @@ resource "helm_release" "argocd_nginx_ingress" {
 # ###############################################
 # #     AWS ELB for ArgoCD
 # ###############################################
-
 resource "kubernetes_ingress_v1" "argocd_elb_ingress" {
   count = var.create && var.create_argocd ? 1 : 0
   metadata {
@@ -147,6 +146,50 @@ resource "kubernetes_ingress_v1" "argocd_elb_ingress" {
   wait_for_load_balancer = true
   depends_on = [
     helm_release.aws_elb_controller,
+    helm_release.argocd,
+  ]
+}
+
+# ###############################################
+# #     ARGOCD Project and Roles
+# ###############################################
+resource "kubectl_manifest" "argocd_projects" {
+  for_each  = var.create_argocd ? { for item in var.argocd_projects_roles : item.name => item } : {}
+  yaml_body = <<-EOF
+    apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      name: "${each.value.name}"
+      namespace: "${lookup(each.value, "namespace", "argocd")}"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      description: "${each.value.name} - cluster manager POC Project"
+      sourceRepos:
+      - "*"
+      destinations:
+      - namespace: "*"
+        server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+      - group: "*"
+        kind: "*"
+      namespaceResourceWhitelist:
+      - group: "*"
+        kind: "*"
+      roles:
+      - name: ci-role
+        description: "Sync privileges for ${each.value.name}"
+        policies:
+        - "p, proj:${each.value.name}:${each.value.name}, applications, get, ${each.value.name}/*, allow"
+        - "p, proj:${each.value.name}:${each.value.name}, applications, override, ${each.value.name}/*, allow"
+        - "p, proj:${each.value.name}:${each.value.name}, applications, sync, ${each.value.name}/*, allow"
+        - "p, proj:${each.value.name}:${each.value.name}, exec, * , ${each.value.name}/*, allow"
+  EOF
+
+
+  depends_on = [
+    helm_release.external_secrets,
+    kubectl_manifest.aws_clustersecretstore,
     helm_release.argocd,
   ]
 }
