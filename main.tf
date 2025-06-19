@@ -9,68 +9,66 @@ provider "aws" {
 
 
 module "capi_cluster_manager_bootstrap_app" {
-  # source  = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
-  source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
-  version = "1.0.1"
+  source = "../../modules/terraform-aws-capi-cluster-manager-bootstrap-apps"
+  # source  = "ljcheng999/capi-cluster-manager-bootstrap-apps/aws"
+  # version = "1.0.1"
 
-
-  create                                           = local.create
-  cluster_name                                     = local.cluster_name
-  route53_zone_id                                  = local.route53_zone_id
-  custom_domain                                    = local.custom_domain
-  
-  ### AWS ELB
-  create_aws_elb_controller                        = local.create_aws_elb_controller
-  helm_release_aws_elb_controller_parameter        = local.helm_release_aws_elb_controller_parameter
-
-  ### AWS ALB INGRESS
-  create_aws_alb_ingress                           = local.create_aws_alb_ingress
-  aws_alb_ingress_parameter                        = local.aws_alb_ingress_parameter
-
-  ### External Secrets
-  create_external_secrets                          = local.create_external_secrets
-  helm_release_external_secrets_parameter          = local.helm_release_external_secrets_parameter
-
-  ### Velero
-  create_velero_controller                         = local.create_velero_controller
-  helm_release_velero_parameter                    = local.helm_release_velero_parameter
-
-  ### Metrics Server
-  create_metrics_server_controller                 = local.create_metrics_server_controller
-  helm_release_metrics_server_controller_parameter = local.helm_release_metrics_server_controller_parameter
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  ### ArgoCD
-  create_argocd                                    = local.create_argocd
-  argocd_endpoint                                  = local.argocd_endpoint
-  create_argocd_cert                               = local.create_argocd_cert
-  create_wildcard_argocd_cert                      = local.create_wildcard_argocd_cert
-  argocd_waf_arn                                   = local.argocd_waf_arn
-
-  public_subnet_ids                                = local.public_subnet_ids
-
-
-
-  
-
-  # tags = local.tags
   tags = merge(
     local.tags,
     local.addition_tags
   )
+
+  create = var.create
+
+
+  ### AWS ELB
+  create_aws_elb_controller                 = var.create_aws_elb_controller
+  helm_release_aws_elb_controller_parameter = var.helm_release_aws_elb_controller_parameter
+
+  ### External Secrets
+  create_external_secrets                 = var.create_external_secrets
+  helm_release_external_secrets_parameter = var.helm_release_external_secrets_parameter
+
+  ### Metrics Server
+  create_metric_server                 = var.create_metric_server
+  helm_release_metric_server_parameter = var.helm_release_metric_server_parameter
+
+  ### Velero
+  create_velero_controller      = var.create_velero_controller
+  helm_release_velero_parameter = local.helm_release_velero_parameter
+
+
+  # ### ArgoCD
+  # create_argocd                               = var.create_argocd
+  # helm_release_argocd_ingress_nginx_parameter = var.helm_release_argocd_ingress_nginx_parameter
+  # helm_release_argocd_parameter               = var.helm_release_argocd_parameter
+
+  # argocd_hostname                                = "${var.cluster_name}.${var.argocd_subdomain}.${var.custom_domain}"
+  # argocd_admin_secret_path                       = local.argocd_admin_secret_path
+  # argocd_elb_waf_name                            = "${var.cluster_name}-argocd-elb-waf"
+  # argocd_elb_waf_acl_visibility_config           = local.argocd_elb_waf_acl_visibility_config
+  # argocd_elb_waf_acl_resource_arn                = var.argocd_elb_waf_acl_resource_arn
+  # argocd_elb_waf_acl_log_destination_configs_arn = var.argocd_elb_waf_acl_log_destination_configs_arn
+
+
+  # # argocd_upstream_projects_roles     = var.argocd_upstream_projects_roles
+  # # argocd_upstream_application_config = var.argocd_upstream_application_config
+
+  create_argocd                               = var.create_argocd
+  helm_release_argocd_ingress_nginx_parameter = var.helm_release_argocd_ingress_nginx_parameter
+  helm_release_argocd_parameter               = var.helm_release_argocd_parameter
+
+  argocd_hostname                                = "${var.cluster_name}.${var.argocd_subdomain}.${var.custom_domain}"
+  argocd_keycloak_realm_name                     = var.argocd_keycloak_realm_name
+  argocd_admin_secret_path                       = local.argocd_admin_secret_path
+  argocd_elb_waf_name                            = "${var.cluster_name}-argocd-elb-waf"
+  argocd_elb_waf_acl_visibility_config           = local.argocd_elb_waf_acl_visibility_config
+  argocd_elb_waf_acl_resource_arn                = var.argocd_elb_waf_acl_resource_arn
+  argocd_elb_waf_acl_log_destination_configs_arn = var.argocd_elb_waf_acl_log_destination_configs_arn
+
+  argocd_upstream_projects_roles     = var.argocd_upstream_projects_roles
+  argocd_upstream_application_config = var.argocd_upstream_application_config
+
 }
 
 

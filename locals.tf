@@ -8,49 +8,28 @@ locals {
     application     = "capi-cluster-manager-bootstrap-apps"
     automation_tool = "terraform"
   }
-  addition_tags                                    = var.addition_tags
+  addition_tags = var.addition_tags
 
 
-  create                                           = var.create
-  cluster_name                                     = var.cluster_name
-  route53_zone_id                                  = var.route53_zone_id
-  custom_domain                                    = var.custom_domain
+  # core_account_public_subnet_ids_string = length(var.public_subnet_ids) == 0 ? join(",", var.core_account_public_subnet_ids) : ""
 
-  ### AWS ELB
-  create_aws_elb_controller                        = var.create_aws_elb_controller
-  helm_release_aws_elb_controller_parameter        = var.helm_release_aws_elb_controller_parameter
+  argocd_admin_secret_path = "/cluster-manager/${var.cluster_name}/argocd/admin_password"
 
-  ### AWS ALB INGRESS
-  create_aws_alb_ingress                           = var.create_aws_alb_ingress
-  aws_alb_ingress_parameter                        = var.aws_alb_ingress_parameter
+  argocd_elb_waf_acl_visibility_config = merge(
+    var.argocd_elb_waf_acl_visibility_config,
+    {
+      "metric_name" : "${var.cluster_name}-argocd-waf-acl-cloudwatch-metrics"
+    }
+  )
 
-  ### External Secrets
-  create_external_secrets                          = var.create_external_secrets
-  helm_release_external_secrets_parameter          = var.helm_release_external_secrets_parameter
+  helm_release_velero_parameter = merge(
+    var.helm_release_velero_parameter,
+    {
+      cloud_bucket             = "ljc-cluster-backups",
+      cloud_bucket_folder_name = var.cluster_name,
+      cloud_region             = var.region,
+      cloud_bucket_prefix      = var.cluster_name,
+    }
+  )
 
-  ### Velero
-  create_velero_controller                         = var.create_velero_controller
-  helm_release_velero_parameter                    = var.helm_release_velero_parameter
-
-  ### Metrics Server
-  create_metrics_server_controller                 = var.create_metrics_server_controller
-  helm_release_metrics_server_controller_parameter = var.helm_release_metrics_server_controller_parameter
-
-
-
-
-
-
-  ### ArgoCD
-  create_argocd                                    = var.create_argocd
-  create_argocd_cert                               = var.create_argocd_cert
-  create_wildcard_argocd_cert                      = var.create_wildcard_argocd_cert
-  helm_release_argocd_helm_chart_version           = var.helm_release_argocd_helm_chart_version
-  argocd_endpoint                                  = "${var.cluster_name}.${var.custom_argocd_subdomain}.${var.custom_domain}"
-  argocd_waf_arn                                   = var.argocd_waf_arn
-
-
-  public_subnet_ids                                = var.public_subnet_ids
-
-  
 }
