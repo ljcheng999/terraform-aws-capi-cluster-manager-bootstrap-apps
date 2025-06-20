@@ -286,20 +286,27 @@ variable "default_argocd_alb_ingress_parameter" {
     argocd_alb_ingress_certificate_arn          = "argocd_alb_ingress_certificate_arn"
   }
 }
-variable "argocd_upstream_projects_roles" {
-  default = []
+# variable "argocd_upstream_projects_roles" {
+#   default = []
+# }
+
+variable "argocd_upstream_project_role" {
+  default = "cluster-manager"
 }
 
 variable "argocd_upstream_application_config" {
+  default = {}
+}
+variable "default_argocd_upstream_application_config_key" {
   default = {
-    project               = "cluster-manager"
-    version_path          = ""
-    repo_url              = "https://gitlab.spectrumflow.net/digitalmarketing/devops/terraform/capi/capi-upstream.git"
-    target_revision       = "HEAD"
-    ext_var               = "clusterManagementGroup"
-    ext_var_value         = ""
-    destination_namespace = "cluster-catalogs"
-    destination_server    = "https://kubernetes.default.svc"
+    project               = "project"
+    version_path          = "version_path"
+    repo_url              = "repo_url"
+    target_revision       = "target_revision"
+    ext_var_key           = "ext_var_key"
+    ext_var_value         = "ext_var_value"
+    destination_namespace = "destination_namespace"
+    destination_server    = "destination_server"
   }
 }
 

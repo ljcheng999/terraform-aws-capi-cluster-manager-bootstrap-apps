@@ -48,8 +48,9 @@ resource "helm_release" "argocd_nginx_ingress" {
   count            = var.create && var.create_argocd ? 1 : 0
   create_namespace = true
 
-  chart      = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_chart, "ingress-nginx")
-  name       = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_name, "${var.cluster_name}-argocd-ingress-nginx")
+  chart = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_chart, "ingress-nginx")
+  # name  = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_name, "ingress-nginx")
+  name       = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_name, "${var.cluster_name}-argocd-ingress-nginx-controller")
   namespace  = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "nginx")
   repository = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_url, "https://kubernetes.github.io/ingress-nginx")
   version    = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_version, "4.12.2")
@@ -131,7 +132,8 @@ resource "kubernetes_ingress_v1" "argocd_elb_ingress" {
         path {
           backend {
             service {
-              name = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "${var.cluster_name}-argocd-ingress-nginx-controller")
+              name = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "ingress-nginx-controller")
+              # name = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "${var.cluster_name}-argocd-ingress-nginx-controller")
               port {
                 number = 80
               }
@@ -146,50 +148,6 @@ resource "kubernetes_ingress_v1" "argocd_elb_ingress" {
   wait_for_load_balancer = true
   depends_on = [
     helm_release.aws_elb_controller,
-    helm_release.argocd,
-  ]
-}
-
-# ###############################################
-# #     ARGOCD Project and Roles
-# ###############################################
-resource "kubectl_manifest" "argocd_projects" {
-  for_each  = var.create_argocd ? { for item in var.argocd_projects_roles : item.name => item } : {}
-  yaml_body = <<-EOF
-    apiVersion: argoproj.io/v1alpha1
-    kind: AppProject
-    metadata:
-      name: "${each.value.name}"
-      namespace: "${lookup(each.value, "namespace", "argocd")}"
-      finalizers:
-        - resources-finalizer.argocd.argoproj.io
-    spec:
-      description: "${each.value.name} - cluster manager POC Project"
-      sourceRepos:
-      - "*"
-      destinations:
-      - namespace: "*"
-        server: https://kubernetes.default.svc
-      clusterResourceWhitelist:
-      - group: "*"
-        kind: "*"
-      namespaceResourceWhitelist:
-      - group: "*"
-        kind: "*"
-      roles:
-      - name: ci-role
-        description: "Sync privileges for ${each.value.name}"
-        policies:
-        - "p, proj:${each.value.name}:${each.value.name}, applications, get, ${each.value.name}/*, allow"
-        - "p, proj:${each.value.name}:${each.value.name}, applications, override, ${each.value.name}/*, allow"
-        - "p, proj:${each.value.name}:${each.value.name}, applications, sync, ${each.value.name}/*, allow"
-        - "p, proj:${each.value.name}:${each.value.name}, exec, * , ${each.value.name}/*, allow"
-  EOF
-
-
-  depends_on = [
-    helm_release.external_secrets,
-    kubectl_manifest.aws_clustersecretstore,
     helm_release.argocd,
   ]
 }
@@ -221,8 +179,6 @@ resource "random_password" "random_argo_admin_password" {
     ignore_changes = all
   }
 }
-
-
 
 # # ###############################################
 # # #     ArgoCD AWS Components
@@ -334,3 +290,128 @@ resource "aws_route53_record" "argocd_cname_record" {
   ]
 }
 
+# ###############################################
+# #     ARGOCD Components
+# ###############################################
+resource "kubectl_manifest" "argocd_upstream_project" {
+  yaml_body = <<-EOF
+    apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      name: "${var.argocd_upstream_project_role}"
+      namespace: "argocd"
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      description: "${var.argocd_upstream_project_role} - cluster manager upstream Project"
+      sourceRepos:
+      - "*"
+      destinations:
+      - namespace: "*"
+        server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+      - group: "*"
+        kind: "*"
+      namespaceResourceWhitelist:
+      - group: "*"
+        kind: "*"
+      roles:
+      - name: "${var.argocd_upstream_project_role}-ci-role"
+        description: "Sync privileges for ${var.argocd_upstream_project_role}"
+        policies:
+        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, applications, get, ${var.argocd_upstream_project_role}/*, allow"
+        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, applications, override, ${var.argocd_upstream_project_role}/*, allow"
+        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, applications, sync, ${var.argocd_upstream_project_role}/*, allow"
+        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, exec, * , ${var.argocd_upstream_project_role}/*, allow"
+  EOF
+
+  depends_on = [
+    helm_release.external_secrets,
+    kubectl_manifest.aws_clustersecretstore,
+    helm_release.argocd,
+  ]
+}
+# resource "kubectl_manifest" "argocd_projects" {
+#   for_each  = var.create_argocd ? { for item in var.argocd_projects_roles : item.name => item } : {}
+#   yaml_body = <<-EOF
+#     apiVersion: argoproj.io/v1alpha1
+#     kind: AppProject
+#     metadata:
+#       name: "${each.value.name}"
+#       namespace: "${lookup(each.value, "namespace", "argocd")}"
+#       finalizers:
+#         - resources-finalizer.argocd.argoproj.io
+#     spec:
+#       description: "${each.value.name} - cluster manager POC Project"
+#       sourceRepos:
+#       - "*"
+#       destinations:
+#       - namespace: "*"
+#         server: https://kubernetes.default.svc
+#       clusterResourceWhitelist:
+#       - group: "*"
+#         kind: "*"
+#       namespaceResourceWhitelist:
+#       - group: "*"
+#         kind: "*"
+#       roles:
+#       - name: ci-role
+#         description: "Sync privileges for ${each.value.name}"
+#         policies:
+#         - "p, proj:${each.value.name}:${each.value.name}, applications, get, ${each.value.name}/*, allow"
+#         - "p, proj:${each.value.name}:${each.value.name}, applications, override, ${each.value.name}/*, allow"
+#         - "p, proj:${each.value.name}:${each.value.name}, applications, sync, ${each.value.name}/*, allow"
+#         - "p, proj:${each.value.name}:${each.value.name}, exec, * , ${each.value.name}/*, allow"
+#   EOF
+
+#   depends_on = [
+#     helm_release.external_secrets,
+#     kubectl_manifest.aws_clustersecretstore,
+#     helm_release.argocd,
+#   ]
+# }
+
+resource "kubectl_manifest" "kube_cm_argocd_application" {
+  yaml_body = <<-EOF
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: capi-upstream-kube-cm
+      namespace: argocd
+    spec:
+      project: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.project, "cluster-manager")}
+      source:
+        repoURL: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.repo_url, "https://github.com/ljcheng999/capi-gitops.git")}
+        targetRevision: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.target_revision, "HEAD")}
+        path: "capi-upstream/kube-cm/${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.version_path, "")}"
+        directory:
+          jsonnet:
+            extVars:
+            - name: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.ext_var_key, "clusterManagementGroup")}
+              value: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.ext_var_value, "ljc")}
+      destination:
+        server: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.destination_server, "https://kubernetes.default.svc")}
+        namespace: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.destination_namespace, "cluster-catalogs")}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+        syncOptions:
+        - CreateNamespace=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+
+  EOF
+
+  depends_on = [
+    helm_release.external_secrets,
+    kubectl_manifest.aws_clustersecretstore,
+    helm_release.argocd,
+    kubernetes_ingress_v1.argocd_elb_ingress
+  ]
+}
