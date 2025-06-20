@@ -62,7 +62,7 @@ resource "helm_release" "argocd_nginx_ingress" {
   values = [
     templatefile("${path.module}/templates/helm/argocd-nginx-ingress-values.yaml", {
       cluster_name             = "${var.cluster_name}",
-      argocd_ingress_classname = "${var.argocd_ingress_classname != "" ? var.argocd_ingress_classname : var.default_argocd_ingress_classname}",
+      argocd_ingress_classname = "${var.create_aws_elb_controller ? var.default_argocd_ingress_classname : var.default_aws_elb_controller_ingress_class}",
       toleration_key           = "node.${var.custom_domain}/role",
       toleration_value         = "system",
     })
