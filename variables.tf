@@ -286,9 +286,6 @@ variable "default_argocd_alb_ingress_parameter" {
     argocd_alb_ingress_certificate_arn          = "argocd_alb_ingress_certificate_arn"
   }
 }
-# variable "argocd_upstream_projects_roles" {
-#   default = []
-# }
 
 variable "argocd_upstream_project_role" {
   default = "cluster-manager"
