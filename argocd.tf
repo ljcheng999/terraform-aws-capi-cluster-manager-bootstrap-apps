@@ -294,6 +294,7 @@ resource "aws_route53_record" "argocd_cname_record" {
 # #     ARGOCD Components
 # ###############################################
 resource "kubectl_manifest" "argocd_upstream_project" {
+  count     = var.create && var.create_argocd ? 1 : 0
   yaml_body = <<-EOF
     apiVersion: argoproj.io/v1alpha1
     kind: AppProject
