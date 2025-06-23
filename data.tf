@@ -99,7 +99,7 @@ data "aws_iam_policy_document" "velero_assume_role" {
 data "kubernetes_ingress_v1" "aws_argocd_elb" {
   count = var.create && var.create_argocd ? 1 : 0
   metadata {
-    name      = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "${var.cluster_name}-argocd-ingress-nginx-controller")
+    name      = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "${var.cluster_name}-argocd-ingress-nginx")
     namespace = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "nginx")
   }
   depends_on = [

@@ -48,9 +48,8 @@ resource "helm_release" "argocd_nginx_ingress" {
   count            = var.create && var.create_argocd ? 1 : 0
   create_namespace = true
 
-  chart = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_chart, "ingress-nginx")
-  # name  = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_name, "ingress-nginx")
-  name       = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_name, "${var.cluster_name}-argocd-ingress-nginx-controller")
+  chart      = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_chart, "ingress-nginx")
+  name       = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_name, "ingress-nginx")
   namespace  = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "nginx")
   repository = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_url, "https://kubernetes.github.io/ingress-nginx")
   version    = lookup(var.helm_release_argocd_ingress_nginx_parameter, var.default_helm_repo_parameter.helm_repo_version, "4.12.2")
@@ -81,7 +80,7 @@ resource "helm_release" "argocd_nginx_ingress" {
 resource "kubernetes_ingress_v1" "argocd_elb_ingress" {
   count = var.create && var.create_argocd ? 1 : 0
   metadata {
-    name      = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "${var.cluster_name}-argocd-ingress-nginx-controller")
+    name      = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "${var.cluster_name}-argocd-ingress-nginx")
     namespace = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_namespace, "nginx")
     annotations = {
       "alb.ingress.kubernetes.io/actions.ssl-redirect"                = <<JSON
@@ -106,7 +105,7 @@ resource "kubernetes_ingress_v1" "argocd_elb_ingress" {
       "alb.ingress.kubernetes.io/manage-backend-security-group-rules" = true
       "alb.ingress.kubernetes.io/scheme"                              = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_scheme, "internet-facing")}"
       "alb.ingress.kubernetes.io/security-groups"                     = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_security_groups, "") == "" ? "${module.argocd_elb_sg[0].security_group_id}" : ""}"
-      "alb.ingress.kubernetes.io/ssl-policy"                          = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_ssl_policy, "ELBSecurityPolicy-TLS13-1-2-2021-06")}"
+      "alb.ingress.kubernetes.io/ssl-policy"                          = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_ssl_policy, "ELBSecurityPolicy-TLS13-1-2-Res-2021-06")}"
       "alb.ingress.kubernetes.io/subnets"                             = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_scheme, "internet-facing") == "internet-facing" ? "${join(",", data.aws_subnets.public_subnets[0].ids)}" : ""}"
       "alb.ingress.kubernetes.io/success-codes"                       = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_success_codes, "200")}"
       "alb.ingress.kubernetes.io/target-type"                         = "${lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_target_type, "instance")}"
@@ -133,7 +132,6 @@ resource "kubernetes_ingress_v1" "argocd_elb_ingress" {
           backend {
             service {
               name = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "ingress-nginx-controller")
-              # name = lookup(var.argocd_alb_ingress_parameter, var.default_argocd_alb_ingress_parameter.argocd_alb_ingress_name, "${var.cluster_name}-argocd-ingress-nginx-controller")
               port {
                 number = 80
               }
@@ -218,7 +216,15 @@ module "argocd_elb_sg" {
     },
   ]
 
-  egress_cidr_blocks = ["0.0.0.0/0"]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = "0.0.0.0/0"
+    },
+  ]
+
   tags = merge(
     {
       "Name" : "${var.cluster_name}-argocd-sg"
