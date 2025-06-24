@@ -385,15 +385,15 @@ resource "kubectl_manifest" "kube_cm_argocd_application" {
   ]
 }
 
-resource "kubectl_manifest" "capi_cluster_catalogs_repo_es" {
-  count     = var.create && var.create_argocd ? 1 : 0
+resource "kubectl_manifest" "capi_cluster_catalogs_repo_es_gitlab" {
+  count     = var.create && var.create_argocd && (var.argocd_repo_creds_gitlab != {}) ? 1 : 0
   yaml_body = <<-EOF
     apiVersion: external-secrets.io/v1
     kind: ExternalSecret
     metadata:
       labels:
         "argocd.argoproj.io/secret-type": "repo-creds"
-      name: "${lookup(var.argocd_repo_creds, "manifest_name", "downstream-cluster-catalogs-es")}"
+      name: "${lookup(var.argocd_repo_creds_gitlab, "manifest_name", "downstream-cluster-catalogs-es")}"
       namespace: "argocd"
     spec:
       secretStoreRef:
@@ -405,23 +405,70 @@ resource "kubectl_manifest" "capi_cluster_catalogs_repo_es" {
       data:
       - secretKey: "url"
         remoteRef:
-          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          key: "${lookup(var.argocd_repo_creds_gitlab, "secrets_manager_path", "")}"
           property: "url"
       - secretKey: "type"
         remoteRef:
-          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          key: "${lookup(var.argocd_repo_creds_gitlab, "secrets_manager_path", "")}"
           property: "type"
       - secretKey: "password"
         remoteRef:
-          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          key: "${lookup(var.argocd_repo_creds_gitlab, "secrets_manager_path", "")}"
           property: "password"
       - secretKey: "name"
         remoteRef:
-          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          key: "${lookup(var.argocd_repo_creds_gitlab, "secrets_manager_path", "")}"
           property: "name"
       - secretKey: "project"
         remoteRef:
-          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          key: "${lookup(var.argocd_repo_creds_gitlab, "secrets_manager_path", "")}"
+          property: "project"
+
+    EOF
+  depends_on = [
+    helm_release.external_secrets,
+    kubectl_manifest.aws_clustersecretstore,
+    helm_release.argocd,
+  ]
+}
+
+resource "kubectl_manifest" "capi_cluster_catalogs_repo_es_github" {
+  count     = var.create && var.create_argocd && (var.argocd_repo_creds_github != {}) ? 1 : 0
+  yaml_body = <<-EOF
+    apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      labels:
+        "argocd.argoproj.io/secret-type": "repo-creds"
+      name: "${lookup(var.argocd_repo_creds_github, "manifest_name", "downstream-cluster-catalogs-es")}"
+      namespace: "argocd"
+    spec:
+      secretStoreRef:
+        name: ${kubectl_manifest.aws_clustersecretstore.0.name}
+        kind: "ClusterSecretStore"
+      refreshInterval: "1h"
+      target:
+        creationPolicy: "Owner"
+      data:
+      - secretKey: "url"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds_github, "secrets_manager_path", "")}"
+          property: "url"
+      - secretKey: "type"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds_github, "secrets_manager_path", "")}"
+          property: "type"
+      - secretKey: "password"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds_github, "secrets_manager_path", "")}"
+          property: "password"
+      - secretKey: "name"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds_github, "secrets_manager_path", "")}"
+          property: "name"
+      - secretKey: "project"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds_github, "secrets_manager_path", "")}"
           property: "project"
 
     EOF

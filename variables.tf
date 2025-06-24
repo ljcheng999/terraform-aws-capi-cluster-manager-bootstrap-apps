@@ -287,7 +287,10 @@ variable "default_argocd_alb_ingress_parameter" {
   }
 }
 
-variable "argocd_repo_creds" {
+variable "argocd_repo_creds_gitlab" {
+  default = {}
+}
+variable "argocd_repo_creds_github" {
   default = {}
 }
 
