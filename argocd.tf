@@ -348,7 +348,7 @@ resource "kubectl_manifest" "kube_cm_argocd_application" {
       name: capi-upstream-kube-cm
       namespace: argocd
     spec:
-      project: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.project, "cluster-manager")}
+      project: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.project, "")}
       source:
         repoURL: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.repo_url, "https://github.com/ljcheng999/capi-gitops.git")}
         targetRevision: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.target_revision, "HEAD")}
