@@ -347,6 +347,8 @@ resource "kubectl_manifest" "kube_cm_argocd_application" {
     metadata:
       name: capi-upstream-kube-cm
       namespace: argocd
+      labels:
+        "argocd.kubesources.com/app": "upstream-kube-cm"
     spec:
       project: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.project, "")}
       source:
