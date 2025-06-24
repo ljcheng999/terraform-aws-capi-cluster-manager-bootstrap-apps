@@ -299,18 +299,18 @@ resource "aws_route53_record" "argocd_cname_record" {
 # ###############################################
 # #     ARGOCD Components
 # ###############################################
-resource "kubectl_manifest" "argocd_upstream_project" {
-  count     = var.create && var.create_argocd ? 1 : 0
+resource "kubectl_manifest" "argocd_upstream_projects" {
+  for_each  = var.create && var.create_argocd ? { for item in var.argocd_upstream_projects_roles : item.name => item } : {}
   yaml_body = <<-EOF
     apiVersion: argoproj.io/v1alpha1
     kind: AppProject
     metadata:
-      name: "${var.argocd_upstream_project_role}"
-      namespace: "argocd"
+      name: "${each.value.name}"
+      namespace: "${lookup(each.value, "namespace", "argocd")}"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
-      description: "${var.argocd_upstream_project_role} - cluster manager upstream Project"
+      description: "${each.value.name} - cluster manager POC Project"
       sourceRepos:
       - "*"
       destinations:
@@ -323,13 +323,13 @@ resource "kubectl_manifest" "argocd_upstream_project" {
       - group: "*"
         kind: "*"
       roles:
-      - name: "${var.argocd_upstream_project_role}-ci-role"
-        description: "Sync privileges for ${var.argocd_upstream_project_role}"
+      - name: ci-role
+        description: "Sync privileges for ${each.value.name}"
         policies:
-        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, applications, get, ${var.argocd_upstream_project_role}/*, allow"
-        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, applications, override, ${var.argocd_upstream_project_role}/*, allow"
-        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, applications, sync, ${var.argocd_upstream_project_role}/*, allow"
-        - "p, proj:${var.argocd_upstream_project_role}:${var.argocd_upstream_project_role}, exec, * , ${var.argocd_upstream_project_role}/*, allow"
+        - "p, proj:${each.value.name}:${each.value.name}, applications, get, ${each.value.name}/*, allow"
+        - "p, proj:${each.value.name}:${each.value.name}, applications, override, ${each.value.name}/*, allow"
+        - "p, proj:${each.value.name}:${each.value.name}, applications, sync, ${each.value.name}/*, allow"
+        - "p, proj:${each.value.name}:${each.value.name}, exec, * , ${each.value.name}/*, allow"
   EOF
 
   depends_on = [
@@ -338,47 +338,9 @@ resource "kubectl_manifest" "argocd_upstream_project" {
     helm_release.argocd,
   ]
 }
-# resource "kubectl_manifest" "argocd_projects" {
-#   for_each  = var.create_argocd ? { for item in var.argocd_projects_roles : item.name => item } : {}
-#   yaml_body = <<-EOF
-#     apiVersion: argoproj.io/v1alpha1
-#     kind: AppProject
-#     metadata:
-#       name: "${each.value.name}"
-#       namespace: "${lookup(each.value, "namespace", "argocd")}"
-#       finalizers:
-#         - resources-finalizer.argocd.argoproj.io
-#     spec:
-#       description: "${each.value.name} - cluster manager POC Project"
-#       sourceRepos:
-#       - "*"
-#       destinations:
-#       - namespace: "*"
-#         server: https://kubernetes.default.svc
-#       clusterResourceWhitelist:
-#       - group: "*"
-#         kind: "*"
-#       namespaceResourceWhitelist:
-#       - group: "*"
-#         kind: "*"
-#       roles:
-#       - name: ci-role
-#         description: "Sync privileges for ${each.value.name}"
-#         policies:
-#         - "p, proj:${each.value.name}:${each.value.name}, applications, get, ${each.value.name}/*, allow"
-#         - "p, proj:${each.value.name}:${each.value.name}, applications, override, ${each.value.name}/*, allow"
-#         - "p, proj:${each.value.name}:${each.value.name}, applications, sync, ${each.value.name}/*, allow"
-#         - "p, proj:${each.value.name}:${each.value.name}, exec, * , ${each.value.name}/*, allow"
-#   EOF
-
-#   depends_on = [
-#     helm_release.external_secrets,
-#     kubectl_manifest.aws_clustersecretstore,
-#     helm_release.argocd,
-#   ]
-# }
 
 resource "kubectl_manifest" "kube_cm_argocd_application" {
+  count     = var.create && var.create_argocd ? 1 : 0
   yaml_body = <<-EOF
     apiVersion: argoproj.io/v1alpha1
     kind: Application
@@ -390,7 +352,7 @@ resource "kubectl_manifest" "kube_cm_argocd_application" {
       source:
         repoURL: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.repo_url, "https://github.com/ljcheng999/capi-gitops.git")}
         targetRevision: ${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.target_revision, "HEAD")}
-        path: "capi-upstream/kube-cm/${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.version_path, "")}"
+        path: "${lookup(var.argocd_upstream_application_config, var.default_argocd_upstream_application_config_key.version_path, "")}"
         directory:
           jsonnet:
             extVars:
@@ -420,5 +382,52 @@ resource "kubectl_manifest" "kube_cm_argocd_application" {
     kubectl_manifest.aws_clustersecretstore,
     helm_release.argocd,
     kubernetes_ingress_v1.argocd_elb_ingress
+  ]
+}
+
+resource "kubectl_manifest" "capi_cluster_catalogs_repo_es" {
+  count     = var.create && var.create_argocd ? 1 : 0
+  yaml_body = <<-EOF
+    apiVersion: external-secrets.io/v1
+    kind: ExternalSecret
+    metadata:
+      labels:
+        "argocd.argoproj.io/secret-type": "repo-creds"
+      name: "${lookup(var.argocd_repo_creds, "manifest_name", "downstream-cluster-catalogs-es")}"
+      namespace: "argocd"
+    spec:
+      secretStoreRef:
+        name: ${kubectl_manifest.aws_clustersecretstore.0.name}
+        kind: "ClusterSecretStore"
+      refreshInterval: "1h"
+      target:
+        creationPolicy: "Owner"
+      data:
+      - secretKey: "url"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          property: "url"
+      - secretKey: "type"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          property: "type"
+      - secretKey: "password"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          property: "password"
+      - secretKey: "name"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          property: "name"
+      - secretKey: "project"
+        remoteRef:
+          key: "${lookup(var.argocd_repo_creds, "secrets_manager_path", "")}"
+          property: "project"
+
+    EOF
+  depends_on = [
+    helm_release.external_secrets,
+    kubectl_manifest.aws_clustersecretstore,
+    helm_release.argocd,
   ]
 }

@@ -56,7 +56,7 @@ resource "kubectl_manifest" "aws_clustersecretstore" {
     apiVersion: external-secrets.io/v1
     kind: ClusterSecretStore
     metadata:
-      name: "ljc-core-cluster-secret-store"
+      name: "core-cluster-secret-store"
     spec:
       provider:
         aws:
