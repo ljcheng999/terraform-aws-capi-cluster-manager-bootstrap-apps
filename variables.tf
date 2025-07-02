@@ -287,9 +287,17 @@ variable "default_argocd_alb_ingress_parameter" {
   }
 }
 
-variable "argocd_upstream_project_role" {
-  default = "cluster-manager"
+variable "argocd_repo_creds_gitlab" {
+  default = {}
 }
+variable "argocd_repo_creds_github" {
+  default = {}
+}
+
+variable "argocd_upstream_projects_roles" {
+  default = []
+}
+
 
 variable "argocd_upstream_application_config" {
   default = {}
