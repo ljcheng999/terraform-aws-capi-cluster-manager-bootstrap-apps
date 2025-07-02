@@ -317,3 +317,11 @@ variable "default_argocd_upstream_application_config_key" {
 #   type        = string
 #   default     = ""
 # }
+
+variable "default_pod_identity_namespace" {
+  description = "the default namespace for all pod identity"
+  default     = "capa-eks-init"
+}
+variable "default_eks_pod_identity_auth_mode_name" {
+  default = "capa-eks-sa"
+}

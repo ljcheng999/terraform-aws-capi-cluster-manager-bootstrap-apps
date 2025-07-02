@@ -133,3 +133,20 @@ data "kubernetes_ingress_v1" "aws_argocd_elb" {
 #     }
 #   }
 # }
+
+data "aws_iam_policy_document" "eks_pod_identity_auth_mode_document" {
+  statement {
+    sid    = "AllowEksAuthToAssumeRoleForPod"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
