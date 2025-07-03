@@ -108,28 +108,23 @@ data "kubernetes_ingress_v1" "aws_argocd_elb" {
 }
 
 # # ###############################################
-# # #     CAPI components
+# # #     CAPA components
 # # ###############################################
-# data "aws_iam_policy_document" "capi_service_account" {
-#   count = var.create && var.create_argocd ? 1 : 0
-#   statement {
-#     actions = ["sts:AssumeRoleWithWebIdentity"]
-#     effect  = "Allow"
-#     principals {
-#       type = "Federated"
-#       identifiers = [
-#         data.aws_iam_openid_connect_provider.this[0].arn
-#       ]
-#     }
-#     condition {
-#       test     = "StringLike"
-#       variable = "${replace(data.aws_iam_openid_connect_provider.this[0].url, "https://", "")}:sub"
-#       values   = ["system:serviceaccount:${lookup(var.helm_release_argocd_parameter, var.default_helm_repo_parameter.helm_repo_namespace, "argocd")}:*"]
-#     }
-#     condition {
-#       test     = "StringLike"
-#       variable = "${replace(data.aws_iam_openid_connect_provider.this[0].url, "https://", "")}:aud"
-#       values   = ["sts.amazonaws.com"]
-#     }
-#   }
-# }
+data "aws_iam_policy_document" "pod_identity_document" {
+  statement {
+    sid    = "AllowEksToAssumeRoleForPod"
+    effect = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "pods.eks.amazonaws.com"
+      ]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession",
+    ]
+  }
+}
