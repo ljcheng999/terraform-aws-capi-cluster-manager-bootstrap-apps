@@ -37,12 +37,14 @@ resource "kubectl_manifest" "eks_pod_identity_sa" {
     kubectl_manifest.pod_identity_namespace,
   ]
 }
+
+
 resource "kubectl_manifest" "pod_identity_namespace" {
   yaml_body = <<-EOF
     apiVersion: v1
     kind: Namespace
     metadata:
-      name: ${var.default_eks_pod_identity_eks_sa_namespace}
+      name: "${var.default_pod_identity_namespace}"
   EOF
 
   depends_on = [
